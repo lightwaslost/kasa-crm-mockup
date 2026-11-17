@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kasa · Park CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f7f9; --surface:#fff; --surface-2:#f9fafb; --hover:#f3f5f8;
+  --border:#e4e8ee; --border-2:#d3d9e2; --divider:#eef1f5;
+  --text:#0d1b2a; --text-2:#475467; --text-3:#7b8798;
+  --brand:#1485bf; --brand-ink:#0b5f88; --brand-deep:#00486c; --brand-soft:#e8f3f9; --brand-btn:#0f6e9e;
+  --ok:#05795a; --ok-soft:#e6f5ef; --warn:#a35a06; --warn-soft:#fdf2e1; --warn-line:#e59a2f;
+  --danger:#b42318; --danger-soft:#fdeceb; --info:#0b5f88; --info-soft:#e8f3f9;
+  --violet:#5b3fc4; --violet-soft:#f0edfc; --slate-soft:#eef1f5;
+  --r:12px; --r-sm:8px;
+  --shadow:0 1px 2px rgba(13,27,42,.04),0 1px 3px rgba(13,27,42,.05);
+  --shadow-lg:0 12px 32px rgba(13,27,42,.14),0 2px 6px rgba(13,27,42,.06);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.45;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+.num,td,.kpi .v,.money{font-variant-numeric:tabular-nums}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- shell ---------- */
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 20px}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(140deg,var(--brand-deep),var(--brand));display:grid;place-items:center;color:#fff;font-weight:700;font-size:16px;letter-spacing:-.02em}
+.brand b{display:block;font-size:15px;letter-spacing:-.01em}
+.brand span{display:block;font-size:12px;color:var(--text-3)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:10px;height:36px;padding:0 10px;border-radius:8px;color:var(--text-2);text-decoration:none;font-weight:500;transition:background .15s,color .15s}
+.nav a:hover{background:var(--hover);color:var(--text)}
+.nav a.on{background:var(--brand-soft);color:var(--brand-ink)}
+.nav .count{margin-left:auto;font-size:11.5px;font-weight:600;min-width:20px;height:20px;padding:0 6px;border-radius:99px;display:grid;place-items:center;background:var(--slate-soft);color:var(--text-2)}
+.nav .count.alert{background:var(--danger-soft);color:var(--danger)}
+.nav-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);padding:18px 10px 6px}
+.side-foot{margin-top:auto;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--surface-2)}
+.side-foot .t{font-size:12px;color:var(--text-3)}
+.side-foot .n{font-weight:600;margin:2px 0 8px}
+
+.main{min-width:0}
+.top{position:sticky;top:0;z-index:30;height:60px;display:flex;align-items:center;gap:12px;padding:0 28px;background:rgba(245,247,249,.86);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--border)}
+.top h1{font-size:17px;font-weight:600;margin:0;letter-spacing:-.015em;display:flex;align-items:center;gap:8px}
+.top h1 .crumb{color:var(--text-3);font-weight:500;text-decoration:none}
+.top h1 .crumb:hover{color:var(--text)}
+.searchbtn{margin-left:auto;display:flex;align-items:center;gap:8px;width:300px;height:36px;padding:0 10px;border:1px solid var(--border);background:var(--surface);border-radius:9px;color:var(--text-3);cursor:pointer;transition:border-color .15s}
+.searchbtn:hover{border-color:var(--border-2)}
+.searchbtn kbd{margin-left:auto}
+.searchbtn .lbl{white-space:nowrap}
+kbd{font-family:inherit;font-size:11px;font-weight:600;color:var(--text-3);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--surface)}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;background:var(--brand-soft);color:var(--brand-ink);flex:none}
+.avatar.sm{width:22px;height:22px;font-size:10px}
+#view{padding:24px 28px 56px;max-width:1520px;animation:fade .25s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---------- primitives ---------- */
+.btn{text-decoration:none;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border-2);background:var(--surface);font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,transform .1s}
+.btn:hover{background:var(--hover)}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--brand-btn);border-color:var(--brand-btn);color:#fff}
+.btn.primary:hover{background:var(--brand-deep)}
+.btn.sm{height:28px;padding:0 10px;font-size:12.5px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--hover)}
+.seg-ctl{display:inline-flex;padding:3px;background:var(--slate-soft);border-radius:9px;gap:2px}
+.seg-ctl button{height:28px;padding:0 12px;border:0;border-radius:7px;background:transparent;font-weight:500;color:var(--text-2);cursor:pointer}
+.seg-ctl button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);min-width:0}
+.card:has(>table){overflow-x:auto}
+.card-h{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--divider)}
+.card-h h3{margin:0;font-size:13.5px;font-weight:600}
+.card-h .sub{color:var(--text-3);font-size:12.5px}
+.card-h .r{margin-left:auto}
+.card-b{padding:16px}
+.muted{color:var(--text-3)}
+.small{font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 8px;border-radius:99px;font-size:12px;font-weight:500;white-space:nowrap;background:var(--slate-soft);color:var(--text-2)}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.9}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.danger{background:var(--danger-soft);color:var(--danger)}
+.chip.info{background:var(--info-soft);color:var(--info)}
+.chip.violet{background:var(--violet-soft);color:var(--violet)}
+.chip.plain::before{display:none}
+.meter{height:8px;background:var(--slate-soft);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand-deep));transform-origin:left;animation:grow .6s var(--ease)}
+@keyframes grow{from{transform:scaleX(0)}}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;font-weight:500;color:var(--text-3);padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap}
+td{padding:11px 16px;border-bottom:1px solid var(--divider);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer;transition:background .12s}
+tr.click:hover td{background:#f7fafd}
+.r{text-align:right}
+.name{font-weight:500}
+.cust-cell{display:flex;align-items:center;gap:10px}
+.swatch{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:600;flex:none;background:hsl(var(--h) 60% 92%);color:hsl(var(--h) 45% 28%)}
+.empty{padding:40px;text-align:center;color:var(--text-3)}
+input.field,select.field,textarea.field{font:inherit;}
+input.field,select.field{height:34px;border:1px solid var(--border-2);border-radius:8px;padding:0 10px;background:var(--surface);font:inherit;color:var(--text);min-width:0}
+input.field:focus,select.field:focus{outline:2px solid var(--brand);outline-offset:-1px;border-color:transparent}
+label.lbl{font-size:12px;font-weight:500;color:var(--text-2);display:flex;flex-direction:column;gap:4px}
+
+/* ---------- dashboard ---------- */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi{padding:16px 16px 14px}
+.kpi .l{display:flex;align-items:center;gap:6px;color:var(--text-2);font-size:12.5px;font-weight:500}
+.kpi .v{font-size:26px;font-weight:600;letter-spacing:-.025em;margin-top:8px;line-height:1.1}
+.kpi .s{font-size:12.5px;color:var(--text-3);margin-top:6px}
+.kpi .s b{font-weight:600}
+.up{color:var(--ok)} .down{color:var(--danger)} .amber{color:var(--warn)}
+.dash{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:16px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.occ-row{display:grid;grid-template-columns:170px 1fr 170px 100px;align-items:center;gap:16px;padding:12px 16px;border-bottom:1px solid var(--divider);text-decoration:none;transition:background .12s}
+.occ-row:last-child{border-bottom:0}
+.occ-row:hover{background:#f7fafd}
+.occ-row .t{font-weight:500}
+.occ-row .t small{display:block;color:var(--text-3);font-weight:400;font-size:12px}
+.att{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--divider);text-decoration:none;transition:background .12s}
+.att:last-child{border-bottom:0}
+.att:hover{background:#f7fafd}
+.att .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+.att .ic.danger{background:var(--danger-soft);color:var(--danger)}
+.att .ic.warn{background:var(--warn-soft);color:var(--warn)}
+.att .ic.info{background:var(--info-soft);color:var(--info)}
+.att .ic.violet{background:var(--violet-soft);color:var(--violet)}
+.att .w{min-width:0;flex:1}
+.att .top-line{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.att .who{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att .what{font-size:12.5px;color:var(--text-3);margin-top:2px}
+.chart{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;align-items:end;height:170px;padding:8px 4px 0}
+.chart .col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;min-width:0}
+.chart .bar{width:100%;max-width:34px;border-radius:6px 6px 2px 2px;background:var(--brand);min-height:3px;transform-origin:bottom;animation:rise .6s var(--ease) both;position:relative}
+.chart .bar.zero{background:var(--slate-soft)}
+.chart .bar.hot{background:var(--warn-line)}
+@keyframes rise{from{transform:scaleY(0)}}
+.chart .val{font-size:11px;font-weight:600;color:var(--text-2);white-space:nowrap}
+.chart .m{font-size:11px;color:var(--text-3)}
+.funnel{display:flex;flex-direction:column;gap:10px}
+.funnel a{display:grid;grid-template-columns:100px 1fr 34px 76px;align-items:center;gap:10px;text-decoration:none;font-size:13px}
+.funnel .fb{height:22px;border-radius:6px;background:var(--brand-soft);position:relative;overflow:hidden}
+.funnel .fb i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--brand),#4fb0de);border-radius:6px;animation:grow .6s var(--ease)}
+
+/* ---------- spaces ---------- */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.toolbar .sp{flex:1}
+.find{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding:14px 16px;margin-bottom:16px}
+.find .ttl{display:flex;align-items:center;gap:8px;font-weight:600;margin-right:6px;align-self:center}
+.find .ttl .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-ink)}
+.results{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:-4px 0 16px}
+.res{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--border-2);background:var(--surface);cursor:pointer;font-weight:500;transition:border-color .15s,background .15s}
+.res:hover{border-color:var(--brand)}
+.res.best{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-ink)}
+.res .tag{font-size:11px;font-weight:600;background:var(--brand-btn);color:#fff;border-radius:5px;padding:1px 6px}
+.legend{display:flex;gap:14px;align-items:center;color:var(--text-2);font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-vac{width:14px;height:10px;border-radius:3px;border:1px dashed #b9c3d0;background:repeating-linear-gradient(135deg,#f1f4f8 0 3px,#e3e8ef 3px 6px)}
+.lg-exp{width:10px;height:10px;border-radius:50%;background:var(--warn-line)}
+.lg-res{width:14px;height:10px;border-radius:3px;background:repeating-linear-gradient(135deg,#d7ecf7 0 3px,#fff 3px 6px);border:1px solid #8fc5e2}
+.section-h{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px}
+.section-h:first-child{margin-top:0}
+.section-h h2{font-size:15px;margin:0;font-weight:600;letter-spacing:-.01em}
+.section-h .muted{font-size:12.5px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:16px}
+.bldg-h{display:flex;align-items:center;gap:12px;padding:14px 16px 10px}
+.bldg-h .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-ink);flex:none}
+.bldg-h .t{font-weight:600}
+.bldg-h .t small{display:block;font-weight:400;color:var(--text-3);font-size:12px}
+.bldg-h .stats{margin-left:auto;display:flex;gap:18px;text-align:right}
+.bldg-h .stats div{font-size:12px;color:var(--text-3)}
+.bldg-h .stats b{display:block;font-size:14px;color:var(--text);font-weight:600}
+.floors{padding:6px 16px 16px;display:flex;flex-direction:column;gap:6px}
+.floor{display:grid;grid-template-columns:34px minmax(0,1fr) 46px;align-items:center;gap:10px}
+.flabel{font-size:12px;font-weight:600;color:var(--text-3)}
+.fpct{font-size:12px;color:var(--text-3);text-align:right}
+.bar{display:flex;gap:3px;height:40px;min-width:0}
+.seg{flex:var(--w) 1 0;min-width:10px;border-radius:7px;border:1px solid hsl(var(--h) 45% 80%);background:hsl(var(--h) 62% 93%);color:hsl(var(--h) 50% 24%);padding:0 9px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;overflow:hidden;white-space:nowrap;cursor:pointer;position:relative;text-align:left;transition:box-shadow .15s,opacity .25s,transform .15s}
+.seg b{font-weight:600;font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.seg small{font-size:10.5px;opacity:.75;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.seg:hover{box-shadow:0 0 0 2px hsl(var(--h) 55% 50%);z-index:1}
+.seg.vac{border:1px dashed #b9c3d0;background:repeating-linear-gradient(135deg,#f3f6f9 0 6px,#e9eef4 6px 12px);color:#596476}
+.seg.vac:hover{box-shadow:0 0 0 2px var(--brand)}
+.seg.exp{border-color:var(--warn-line)}
+.seg.exp::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--warn-line);box-shadow:0 0 0 2px #fff}
+.seg.res{background:repeating-linear-gradient(135deg,hsl(var(--h) 62% 90%) 0 6px,#fff 6px 12px);border:1px solid hsl(var(--h) 45% 70%)}
+.seg.match{border:1.5px solid var(--brand);background:repeating-linear-gradient(135deg,#e8f3f9 0 6px,#d4eaf6 6px 12px);color:var(--brand-ink)}
+.seg.best{box-shadow:0 0 0 3px rgba(20,133,191,.25)}
+.seg.flash{animation:flash 1.2s var(--ease) 2}
+@keyframes flash{50%{box-shadow:0 0 0 4px rgba(20,133,191,.45)}}
+.dim .seg:not(.match){opacity:.28}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,265px),1fr));gap:12px}
+.shed{padding:12px 14px 14px}
+.shed-h{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.shed-h b{font-weight:600}
+.shed-h .muted{font-size:12px}
+.shed-h .r{margin-left:auto;font-size:12px;color:var(--text-3)}
+.shed .bar{height:44px}
+.p2{border-style:dashed}
+.p2 .badge{font-size:11px;font-weight:600;color:var(--violet);background:var(--violet-soft);border-radius:5px;padding:2px 7px;margin-left:6px}
+
+/* ---------- pipeline ---------- */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(258px,1fr);gap:12px;overflow-x:auto;padding-bottom:12px;align-items:start}
+.kcol{background:#eef1f5;border-radius:12px;padding:8px;min-height:62vh;transition:background .15s,outline-color .15s;outline:2px dashed transparent;outline-offset:-2px}
+.kcol.over{background:var(--brand-soft);outline-color:var(--brand)}
+.kcol-h{display:flex;align-items:center;gap:8px;padding:6px 6px 10px}
+.kcol-h b{font-size:13px}
+.kcol-h .n{font-size:12px;color:var(--text-3);font-weight:600;background:#fff;border-radius:99px;padding:0 7px}
+.kcol-h .v{margin-left:auto;font-size:12px;color:var(--text-3)}
+.kcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow);cursor:grab;transition:box-shadow .15s,transform .15s,opacity .15s;display:block;text-decoration:none}
+.kcard:hover{box-shadow:var(--shadow-lg)}
+.kcard.dragging{opacity:.4}
+.kcard .t{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.kcard .meta{font-size:12px;color:var(--text-3);margin-top:6px;display:flex;flex-direction:column;gap:3px}
+.kcard .foot{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px}
+.kcard .foot .val{font-weight:600}
+.kcard .foot .days{margin-left:auto;color:var(--text-3)}
+.kcard .next{margin-top:8px;padding:6px 8px;border-radius:7px;background:var(--surface-2);font-size:12px;color:var(--text-2);display:flex;gap:6px;align-items:center}
+
+/* ---------- customer ---------- */
+.c-head{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.c-head .swatch{width:52px;height:52px;border-radius:14px;font-size:18px}
+.c-head h2{margin:0;font-size:22px;letter-spacing:-.02em}
+.c-head .sub{color:var(--text-3);margin-top:2px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.c-head .acts{margin-left:auto;display:flex;gap:8px}
+.cgrid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:16px;align-items:start}
+.space-row{display:grid;grid-template-columns:170px minmax(0,1fr) 90px;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--divider)}
+.space-row:last-child{border-bottom:0}
+.space-row .bar{height:26px}
+.space-row .seg{padding:0 6px}
+.space-row .seg:not(.mine){opacity:.35}
+.space-row .seg small{display:none}
+.cgrid td.small:nth-child(n+4){white-space:nowrap}
+.tl{position:relative;padding:4px 16px 12px}
+.tl-i{display:grid;grid-template-columns:14px 1fr;gap:12px;padding:8px 0;position:relative}
+.tl-i::before{content:"";position:absolute;left:6px;top:22px;bottom:-8px;width:1px;background:var(--border)}
+.tl-i:last-child::before{display:none}
+.tl-i .d{width:13px;height:13px;border-radius:50%;border:2px solid var(--brand);background:#fff;margin-top:3px}
+.tl-i .d.ok{border-color:var(--ok)} .tl-i .d.danger{border-color:var(--danger)} .tl-i .d.warn{border-color:var(--warn-line)}
+.tl-i .w b{font-weight:500}
+.tl-i .w div{font-size:12px;color:var(--text-3)}
+dl.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0;font-size:13px}
+dl.kv dt{color:var(--text-3)}
+dl.kv dd{margin:0;text-align:right;font-weight:500}
+
+/* ---------- invoices ---------- */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tabs button{height:38px;padding:0 12px;border:0;background:none;font-weight:500;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px}
+.tabs button:hover{color:var(--text)}
+.tabs button.on{color:var(--brand-ink);border-bottom-color:var(--brand)}
+.tabs .n{font-size:11.5px;font-weight:600;background:var(--slate-soft);border-radius:99px;padding:0 7px}
+.tabs .on .n{background:var(--brand-soft)}
+.sum4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+
+/* ---------- overlays ---------- */
+.scrim{position:fixed;inset:0;background:rgba(13,27,42,.38);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--surface);z-index:70;box-shadow:var(--shadow-lg);transform:translateX(102%);transition:transform .28s var(--ease);display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.drawer-h{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--divider)}
+.drawer-h .x{margin-left:auto}
+.drawer-b{padding:18px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.box{border:1px solid var(--border);border-radius:10px;padding:14px}
+.box h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);font-weight:600}
+.match-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--divider)}
+.match-row:last-child{border-bottom:0}
+.palette{position:fixed;left:50%;top:14vh;width:min(600px,92vw);transform:translateX(-50%) scale(.97);opacity:0;pointer-events:none;background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);z-index:80;transition:opacity .15s,transform .15s var(--ease);overflow:hidden;border:1px solid var(--border)}
+.palette.on{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1)}
+.palette input{width:100%;height:52px;border:0;border-bottom:1px solid var(--border);padding:0 18px;font:inherit;font-size:15px;outline:none}
+.palette ul{list-style:none;margin:0;padding:6px;max-height:50vh;overflow:auto}
+.palette li{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer}
+.palette li.on{background:var(--brand-soft)}
+.palette li .k{margin-left:auto;font-size:12px;color:var(--text-3)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,16px);opacity:0;background:#0d1b2a;color:#fff;padding:10px 16px;border-radius:10px;font-weight:500;z-index:90;transition:opacity .2s,transform .2s var(--ease);display:flex;gap:8px;align-items:center;box-shadow:var(--shadow-lg)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.dash,.cgrid{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:row;align-items:center;overflow-x:auto;padding:8px 12px;gap:8px}
+  .brand{padding:0 8px 0 0}.brand span,.nav-label,.side-foot{display:none}
+  .nav{flex-direction:row}.nav a span.lbl{display:none}
+  .searchbtn{width:auto}.searchbtn .lbl,.searchbtn kbd{display:none}
+  .top,#view{padding-left:16px;padding-right:16px}
+  .kpis,.sum4{grid-template-columns:repeat(2,1fr)}
+  .occ-row{grid-template-columns:1fr 90px}.occ-row .meter,.occ-row .hide-m{display:none}
+  .bldg-h .stats{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Main navigation">
+    <div class="brand"><div class="logo">K</div><div><b>Kasa</b><span>Industrial Park · CRM</span></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <h1 id="title">Dashboard</h1>
+      <button class="searchbtn" id="openPalette" aria-label="Search"><span id="icSearch"></span><span class="lbl">Search tenants, spaces…</span><kbd>⌘K</kbd></button>
+      <button class="btn primary" data-act="new"><span id="icPlus"></span>New enquiry</button>
+      <div class="avatar" title="Tanishq">TM</div>
+    </header>
+    <main id="view" tabindex="-1"></main>
+  </div>
+</div>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true"></aside>
+<div class="palette" id="palette" role="dialog" aria-label="Search"><input id="palIn" placeholder="Jump to a tenant, block, shed or page…" autocomplete="off"><ul id="palList"></ul></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   Kasa Park CRM — clickable mockup. All data is sample data.
+   ========================================================= */
+const TODAY = new Date(2026, 10, 15);
+const D = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const days = (a, b) => Math.round((b - a) / 864e5);
+const fmtDate = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+const fmtShort = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+const fmtMon = d => d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+const inr = v => v >= 1e7 ? '₹' + (v / 1e7).toFixed(2) + ' Cr' : v >= 1e5 ? '₹' + (v / 1e5).toFixed(2) + ' L' : '₹' + Math.round(v).toLocaleString('en-IN');
+const inrFull = v => '₹' + Math.round(v).toLocaleString('en-IN');
+const sqft = n => n.toLocaleString('en-IN') + ' sf';
+const pct = (a, b) => b ? Math.round(a / b * 1000) / 10 : 0;
+const $ = s => document.querySelector(s);
+
+/* ---------- icons (lucide-style) ---------- */
+const I = {
+  home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  spaces: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v6M15 9v6M12 15v6"/>',
+  pipeline: '<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.9.8 3.1 2.6 3.5 5.2"/>',
+  invoice: '<path d="M6 2h9l4 4v16l-2.5-1.5L14 22l-2.5-1.5L9 22l-2.5-1.5L4 22V4a2 2 0 0 1 2-2z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  download: '<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',
+  alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  door: '<path d="M14 3H6a1 1 0 0 0-1 1v17h10"/><path d="M19 21V7l-5-4v18"/><path d="M11 12h.01"/>',
+  back: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+  building: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+  shed: '<path d="M2 10 12 3l10 7"/><path d="M4 9v12h16V9"/><path d="M8 21v-7h8v7M8 17.5h8"/>',
+  check: '<path d="m5 12 5 5 9-10"/>',
+  send: '<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',
+  sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+  rupee: '<path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3c6.7 0 6.7-10 0-10"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  crane: '<path d="M3 21h18M6 21V5l13 3M6 5l4 4M14 7v6M12 13h4v3h-4z"/>',
+};
+const ic = (n, s = 16) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+
+/* ---------- park structure (from kasaindustrialpark.com) ---------- */
+const FLOOR_LABEL = { G: 'G', 1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', '-': 'Shed' };
+const SHED_SIZES = [20000, 6000, 4500, 3500, 3000, 2500, 2500, 2000, 2000, 1500, 1500, 1200, 1000, 1000, 1000];
+const STRUCTS = [
+  { id: 'A', name: 'Block A', type: 'building', spec: 'G+3 · 5,000 sf per floor', floors: ['G', '1', '2', '3'], per: 5000 },
+  { id: 'B', name: 'Block B', type: 'building', spec: 'G+4 · 8,000 sf per floor · goods lift', floors: ['G', '1', '2', '3', '4'], per: 8000 },
+  { id: 'C', name: 'Block C', type: 'building', spec: 'G+4 · 7,500 sf per floor · goods lift', floors: ['G', '1', '2', '3', '4'], per: 7500 },
+  ...SHED_SIZES.map((s, i) => ({ id: 'S' + (i + 1), name: 'Shed ' + (i + 1), type: 'shed', spec: 'Industrial shed', floors: ['-'], per: s })),
+  { id: 'D', name: 'Block D', type: 'building', spec: 'G+4 RCC · 10,000 sf per floor', floors: ['G', '1', '2', '3', '4'], per: 10000, phase: 2, ready: 'Q3 2027' },
+  { id: 'E', name: 'Block E', type: 'building', spec: 'G+3 RCC · 4,000 sf per floor', floors: ['G', '1', '2', '3'], per: 4000, phase: 2, ready: 'Q4 2027' },
+  { id: 'S16', name: 'Shed 16', type: 'shed', spec: 'Industrial shed', floors: ['-'], per: 4000, phase: 2, ready: 'Q2 2027' },
+];
+const STRUCT = Object.fromEntries(STRUCTS.map(s => [s.id, s]));
+
+/* ---------- people ---------- */
+const TEAM = { TM: 'Tanishq', RD: 'Ritika D.', AK: 'Amit K.' };
+const STAGES = [
+  ['enquiry', 'Enquiry', ''], ['visit', 'Site visit', 'info'], ['negotiation', 'Negotiation', 'violet'], ['agreement', 'Agreement', 'violet'],
+  ['active', 'Active', 'ok'], ['renewal', 'Renewal due', 'warn'], ['notice', 'Notice given', 'danger'], ['exited', 'Exited', ''],
+];
+const STAGE = Object.fromEntries(STAGES.map(([k, l, c]) => [k, { l, c }]));
+const LEAD_STAGES = ['enquiry', 'visit', 'negotiation', 'agreement'];
+
+// [id, name, industry, contact, stage, owner]
+const CUST_ROWS = [
+  ['howauto', 'Howrah Auto Components', 'Auto parts', 'Sanjay Ghosh', 'active', 'TM'],
+  ['dey', 'Dey Printers & Converters', 'Printing', 'Arindam Dey', 'active', 'RD'],
+  ['rupsa', 'Rupsa Paper Cups', 'Packaging', 'Rupsa Sen', 'active', 'RD'],
+  ['lumina', 'Lumina LED Works', 'Electricals', 'Kunal Shah', 'active', 'AK'],
+  ['sagar', 'Sagar Fasteners', 'Hardware', 'Imran Sheikh', 'active', 'AK'],
+  ['hooghly', 'Hooghly Marine Consultants', 'Marine services', 'Capt. R. Bose', 'active', 'TM'],
+  ['balaji', 'Shree Balaji Steel Fab', 'Fabrication', 'Manoj Agarwal', 'active', 'TM'],
+  ['andul', 'Andul Plastics', 'Plastics', 'Priya Saha', 'active', 'RD'],
+  ['matara', 'Ma Tara Polymers', 'Plastics', 'Debasish Pal', 'active', 'RD'],
+  ['senbros', 'Sen Brothers Hosiery', 'Garments', 'Abhijit Sen', 'active', 'AK'],
+  ['kiran', 'Kiran Garments', 'Garments', 'Kiran Jha', 'active', 'AK'],
+  ['gangapharma', 'Ganga Pharma Distributors', 'Pharma', 'Neha Mukherjee', 'active', 'TM'],
+  ['quickkart', 'QuickKart Logistics', 'Storage · 3PL', 'Rohit Verma', 'active', 'TM'],
+  ['eastline', 'Eastline FMCG Distributors', 'FMCG', 'Vivek Jain', 'active', 'RD'],
+  ['annapurna', 'Annapurna Spices', 'Food', 'Meera Das', 'active', 'RD'],
+  ['jute', 'Bengal Jute Crafts', 'Jute products', 'Sourav Kar', 'active', 'AK'],
+  ['shakti', 'Shakti Electrical Panels', 'Electricals', 'Pradip Roy', 'active', 'TM'],
+  ['eastcables', 'Eastern Cables', 'Cables', 'Anil Gupta', 'active', 'TM'],
+  ['kolfoot', 'Kolkata Footwear Co.', 'Footwear', 'Farhan Ali', 'renewal', 'AK'],
+  ['saraswati', 'Saraswati Furniture', 'Furniture', 'Gopal Mondal', 'renewal', 'RD'],
+  ['gangasagar', 'Gangasagar Ship Spares', 'Ship parts', 'Tapas Biswas', 'active', 'TM'],
+  ['bearings', 'Bharat Bearings', 'Engineering', 'Rakesh Singh', 'active', 'AK'],
+  ['nimtala', 'Nimtala Fabricators', 'Fabrication', 'Subhas Naskar', 'active', 'AK'],
+  ['tiwari', 'Tiwari Bakery Equipment', 'Equipment', 'Ajay Tiwari', 'active', 'RD'],
+  ['mourigram', 'Mourigram Packaging', 'Packaging', 'Bikash Hazra', 'active', 'RD'],
+  ['bose', 'Bose Engineering Works', 'Engineering', 'Partha Bose', 'active', 'TM'],
+  ['mitra', 'Mitra Print Blocks', 'Printing', 'Sudip Mitra', 'active', 'AK'],
+  ['laxmi', 'Laxmi Agarbatti', 'Consumer goods', 'Laxmi Prasad', 'active', 'RD'],
+  ['sunrise', 'Sunrise Gaskets', 'Engineering', 'Rajib Paul', 'active', 'AK'],
+  ['dutta', 'Dutta Enterprises', 'Trading', 'Amit Dutta', 'notice', 'TM'],
+];
+const LEADS = [
+  { id: 'polar', name: 'Polar Cold Chain', ind: 'Cold storage', contact: 'Harsh Kedia', stage: 'agreement', owner: 'TM', since: '2026-11-04', need: { sf: 10000, type: 'building', p2: true }, est: 190000, next: ['Pre-lease agreement signing', '2026-11-20'], reserve: ['D', 'G', 10000] },
+  { id: 'nexa', name: 'Nexa Solar Modules', ind: 'Solar', contact: 'Ankit Bansal', stage: 'negotiation', owner: 'TM', since: '2026-10-22', need: { sf: 16000, type: 'building', p2: true }, est: 270000, next: ['Call: whole of Block E', '2026-11-17'] },
+  { id: 'pragati', name: 'Pragati Steel Traders', ind: 'Steel trading', contact: 'Dinesh Saraf', stage: 'negotiation', owner: 'AK', since: '2026-10-30', need: { sf: 3500, type: 'shed' }, est: 58000, next: ['Send revised lock-in terms', '2026-11-17'] },
+  { id: 'sealink', name: 'Sealink Logistics', ind: 'Storage · 3PL', contact: 'Joy Chatterjee', stage: 'visit', owner: 'TM', since: '2026-11-10', need: { sf: 4000, type: 'building' }, est: 72000, next: ['Site visit · Block C F3', '2026-11-16'] },
+  { id: 'orbitpack', name: 'Orbit Packaging', ind: 'Packaging', contact: 'Ravi Kumar', stage: 'visit', owner: 'RD', since: '2026-11-08', need: { sf: 1000, type: 'shed' }, est: 19000, next: ['Site visit · Shed 13', '2026-11-19'] },
+  { id: 'arambagh', name: 'Arambagh Foods', ind: 'Food processing', contact: 'Sneha Ghosh', stage: 'enquiry', owner: 'RD', since: '2026-11-13', need: { sf: 3000, type: 'building' }, est: 54000, next: ['Share floor plans + quote', '2026-11-18'] },
+  { id: 'vikas', name: 'Vikas Electronics Assembly', ind: 'Electronics', contact: 'Vikas Rao', stage: 'enquiry', owner: 'AK', since: '2026-11-14', need: { sf: 2000, type: 'building' }, est: 38000 },
+  { id: 'riverfront', name: 'Riverfront Exports', ind: 'Exports', contact: 'Nadia Khan', stage: 'enquiry', owner: 'RD', since: '2026-11-15', need: { sf: 1500, type: 'any' }, est: 28000 },
+  { id: 'shyam', name: 'Shyam Textiles', ind: 'Textiles', contact: 'Shyam Lal', stage: 'exited', owner: 'AK', since: '2026-07-31' },
+];
+const CUSTOMERS = [
+  ...CUST_ROWS.map(([id, name, ind, contact, stage, owner]) => ({ id, name, ind, contact, stage, owner })),
+  ...LEADS,
+];
+CUSTOMERS.forEach((c, i) => {
+  c.hue = Math.round((i * 137.508 + 200) % 360);
+  c.phone = '+91 90' + String(51000000 + i * 73129).slice(0, 3) + ' ' + String(10000 + i * 3917).slice(0, 5);
+  c.initials = c.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+});
+const CUST = Object.fromEntries(CUSTOMERS.map(c => [c.id, c]));
+
+/* ---------- contracts: one monthly value covering rent + charges ---------- */
+// [id, cust, rate(hidden, sample only), start, end, lockinEnd, invoiceDay, spaces[[struct, floor, sf]], notice]
+const CON_ROWS = [
+  ['K-101', 'howauto', 17, '2022-04-01', '2027-03-31', '2024-03-31', 1, [['A', 'G', 5000]]],
+  ['K-102', 'dey', 18, '2024-06-01', '2029-05-31', '2026-05-31', 5, [['A', '1', 3000]]],
+  ['K-103', 'rupsa', 19, '2025-02-01', '2028-01-31', '2026-07-31', 5, [['A', '1', 2000]]],
+  ['K-104', 'lumina', 19, '2023-12-10', '2027-12-09', '2026-12-10', 10, [['A', '2', 2500]]],
+  ['K-105', 'sagar', 20, '2025-08-01', '2028-07-31', '2027-01-31', 1, [['A', '2', 1500]]],
+  ['K-106', 'hooghly', 22, '2024-09-01', '2027-08-31', '2025-08-31', 1, [['A', '3', 2000]]],
+  ['K-107', 'balaji', 15, '2021-07-01', '2027-06-30', '2024-06-30', 1, [['B', 'G', 8000]]],
+  ['K-108', 'andul', 16, '2023-04-01', '2028-03-31', '2026-03-31', 1, [['B', '1', 5000]]],
+  ['K-109', 'matara', 17, '2025-05-01', '2028-04-30', '2027-04-30', 5, [['B', '1', 3000]]],
+  ['K-110', 'senbros', 17, '2022-11-01', '2027-10-31', '2025-10-31', 1, [['B', '2', 4000]]],
+  ['K-111', 'kiran', 18, '2024-03-01', '2029-02-28', '2027-02-28', 5, [['B', '2', 4000]]],
+  ['K-112', 'gangapharma', 19, '2024-01-01', '2028-12-31', '2026-12-31', 1, [['B', '3', 6000], ['S11', '-', 1500]]],
+  ['K-113', 'quickkart', 16, '2025-01-01', '2027-12-31', '2026-06-30', 1, [['B', '4', 8000]]],
+  ['K-114', 'eastline', 16, '2023-08-01', '2028-07-31', '2026-07-31', 1, [['C', 'G', 7500]]],
+  ['K-115', 'annapurna', 17, '2024-07-01', '2029-06-30', '2027-06-30', 15, [['C', '1', 4000]]],
+  ['K-116', 'jute', 18, '2025-10-01', '2028-09-30', '2027-09-30', 15, [['C', '1', 3500]]],
+  ['K-117', 'shakti', 17, '2023-02-01', '2028-01-31', '2026-01-31', 1, [['C', '2', 5000]]],
+  ['K-118', 'eastcables', 16, '2024-05-01', '2029-04-30', '2027-04-30', 1, [['C', '2', 2500], ['S1', '-', 8000]]],
+  ['K-119', 'kolfoot', 18, '2024-02-01', '2027-01-31', '2025-07-31', 5, [['C', '3', 3500]]],
+  ['K-120', 'saraswati', 15, '2021-01-01', '2026-12-31', '2023-12-31', 1, [['C', '4', 7500]]],
+  ['K-121', 'gangasagar', 15, '2022-09-01', '2027-08-31', '2025-08-31', 1, [['S1', '-', 12000]]],
+  ['K-122', 'gangasagar', 17, '2025-04-01', '2028-03-31', '2027-03-31', 1, [['S7', '-', 2500]]],
+  ['K-123', 'bearings', 16, '2023-06-01', '2028-05-31', '2026-05-31', 20, [['S2', '-', 6000]]],
+  ['K-124', 'nimtala', 15, '2024-10-01', '2029-09-30', '2027-09-30', 20, [['S3', '-', 4500]]],
+  ['K-125', 'tiwari', 17, '2025-03-01', '2028-02-29', '2027-02-28', 15, [['S5', '-', 3000]]],
+  ['K-126', 'mourigram', 17, '2023-09-01', '2028-08-31', '2026-08-31', 1, [['S6', '-', 2500]]],
+  ['K-127', 'bose', 18, '2024-12-01', '2027-11-30', '2026-05-31', 1, [['S8', '-', 2000]]],
+  ['K-128', 'mitra', 19, '2025-07-01', '2028-06-30', '2027-06-30', 5, [['S10', '-', 1500]]],
+  ['K-129', 'laxmi', 20, '2024-04-01', '2029-03-31', '2027-03-31', 10, [['S12', '-', 1200]]],
+  ['K-130', 'sunrise', 21, '2025-11-01', '2028-10-31', '2027-10-31', 1, [['S14', '-', 1000]]],
+  ['K-131', 'dutta', 20, '2023-01-01', '2026-12-31', '2024-12-31', 1, [['S15', '-', 1000]], true],
+];
+const CONTRACTS = CON_ROWS.map(([id, cust, rate, start, end, lockin, day, spaces, notice]) => {
+  const sf = spaces.reduce((a, s) => a + s[2], 0);
+  return { id, cust, start: D(start), end: D(end), lockin: D(lockin), day, spaces, sf, notice: !!notice, monthly: Math.round(sf * rate / 500) * 500 };
+});
+const CON = Object.fromEntries(CONTRACTS.map(c => [c.id, c]));
+const custContracts = id => CONTRACTS.filter(c => c.cust === id);
+
+function conStatus(c) {
+  const dEnd = days(TODAY, c.end), dLock = days(TODAY, c.lockin);
+  if (c.notice) return { k: 'notice', l: 'Notice · leaving ' + fmtShort(c.end), c: 'danger', sev: 3 };
+  if (dEnd <= 90) return { k: 'expiring', l: 'Ends in ' + dEnd + 'd', c: 'warn', sev: 2 };
+  if (dLock > 0 && dLock <= 60) return { k: 'lockin', l: 'Lock-in ends ' + fmtShort(c.lockin), c: 'info', sev: 1 };
+  return { k: 'active', l: 'Active', c: 'ok', sev: 0 };
+}
+
+/* ---------- build floor map ---------- */
+const FLOORS = {};
+STRUCTS.forEach(s => s.floors.forEach(f => { FLOORS[s.id + '|' + f] = { s, f, sf: s.per, segs: [] }; }));
+CONTRACTS.forEach(c => c.spaces.forEach(([sid, f, sf]) => FLOORS[sid + '|' + f].segs.push({ kind: 'occ', cust: c.cust, con: c.id, sf })));
+LEADS.filter(l => l.reserve).forEach(l => { const [sid, f, sf] = l.reserve; FLOORS[sid + '|' + f].segs.push({ kind: 'res', cust: l.id, sf }); });
+Object.values(FLOORS).forEach(fl => {
+  const used = fl.segs.reduce((a, s) => a + s.sf, 0);
+  if (used > fl.sf) console.warn('Over-allocated', fl.s.id, fl.f);
+  if (fl.sf - used > 0) fl.segs.push({ kind: 'vac', sf: fl.sf - used });
+  fl.segs.forEach((s, i) => { s.key = fl.s.id + '|' + fl.f; s.idx = i; });
+});
+const floorsOf = s => s.floors.map(f => FLOORS[s.id + '|' + f]);
+const spaceName = (sid, f) => STRUCT[sid].type === 'shed' ? STRUCT[sid].name : `${STRUCT[sid].name} · ${FLOOR_LABEL[f]}`;
+function structStats(list) {
+  let total = 0, leased = 0, vac = 0, vacUnits = 0, value = 0;
+  list.forEach(s => floorsOf(s).forEach(fl => {
+    total += fl.sf;
+    fl.segs.forEach(g => {
+      if (g.kind === 'occ') { leased += g.sf; const c = CON[g.con]; value += c.monthly * g.sf / c.sf; }
+      else if (g.kind === 'res') leased += g.sf;
+      else { vac += g.sf; vacUnits++; }
+    });
+  }));
+  return { total, leased, vac, vacUnits, value, occ: pct(leased, total) };
+}
+const LIVE = STRUCTS.filter(s => !s.phase), P2 = STRUCTS.filter(s => s.phase === 2);
+
+/* ---------- invoices (monthly, raised in Tally, net 15) ---------- */
+const OVERDUE = new Set(['K-131|2026-10', 'K-113|2026-10', 'K-128|2026-10']);
+const INVOICES = [];
+CONTRACTS.forEach((c, ci) => {
+  for (let m = 7; m <= 11; m++) {
+    const issue = new Date(2026, m, c.day);
+    if (issue < c.start || issue > c.end || issue > addDays(TODAY, 21)) continue;
+    const due = addDays(issue, 15), ym = `2026-${String(m + 1).padStart(2, '0')}`;
+    let status;
+    if (issue >= TODAY) status = 'upcoming';
+    else if (due < TODAY) status = OVERDUE.has(c.id + '|' + ym) ? 'overdue' : 'paid';
+    else status = (ci % 5 < 3) ? 'paid' : 'sent';
+    INVOICES.push({ con: c.id, cust: c.cust, issue, due, period: issue, amount: c.monthly, gst: Math.round(c.monthly * .18), total: Math.round(c.monthly * 1.18), status, paidOn: status === 'paid' ? addDays(issue, 4 + (ci % 9)) : null });
+  }
+});
+INVOICES.sort((a, b) => a.issue - b.issue);
+let seq = 1041;
+INVOICES.forEach(i => { i.no = i.status === 'upcoming' ? null : `KIP/26-27/${seq++}`; i.id = i.con + '|' + i.issue.toISOString().slice(0, 10); });
+const INV_META = { upcoming: ['To send', 'info'], sent: ['Awaiting payment', 'violet'], overdue: ['Overdue', 'danger'], paid: ['Paid', 'ok'] };
+
+/* ---------- derived ---------- */
+const custMonthly = id => custContracts(id).reduce((a, c) => a + c.monthly, 0);
+const custSf = id => custContracts(id).reduce((a, c) => a + c.sf, 0);
+const nextInvoice = id => INVOICES.filter(i => i.cust === id && i.status === 'upcoming')[0];
+function attention() {
+  const out = [];
+  INVOICES.filter(i => i.status === 'overdue').forEach(i => out.push({ sev: 4, c: 'danger', icon: 'alert', who: CUST[i.cust].name, tag: `Overdue ${days(i.due, TODAY)}d`, what: `${i.no} · ${inrFull(i.total)} · was due ${fmtShort(i.due)}`, href: '#/customers/' + i.cust }));
+  CONTRACTS.forEach(c => {
+    const st = conStatus(c), sp = c.spaces.map(s => spaceName(s[0], s[1])).join(', ');
+    if (st.k === 'notice') out.push({ sev: 3, c: 'danger', icon: 'door', who: CUST[c.cust].name, tag: 'Leaving ' + fmtShort(c.end), what: `${sp} · ${sqft(c.sf)} frees up · start re-letting`, href: '#/customers/' + c.cust });
+    else if (st.k === 'expiring') out.push({ sev: 2, c: 'warn', icon: 'clock', who: CUST[c.cust].name, tag: st.l, what: `${c.id} · ${sp} · ${inr(c.monthly)}/mo up for renewal`, href: '#/customers/' + c.cust });
+    else if (st.k === 'lockin') out.push({ sev: 1, c: 'info', icon: 'lock', who: CUST[c.cust].name, tag: st.l, what: `${c.id} · tenant can exit with notice after this`, href: '#/customers/' + c.cust });
+  });
+  LEADS.filter(l => l.next && days(TODAY, D(l.next[1])) <= 3 && days(TODAY, D(l.next[1])) >= 0).forEach(l => out.push({ sev: 1, c: 'violet', icon: 'pin', who: l.name, tag: days(TODAY, D(l.next[1])) === 1 ? 'Tomorrow' : fmtShort(D(l.next[1])), what: l.next[0], href: '#/customers/' + l.id }));
+  return out.sort((a, b) => b.sev - a.sev);
+}
+
+/* ---------- state ---------- */
+const state = { spacesFilter: 'all', spacesMode: 'visual', find: { sf: '', type: 'any', p2: false, lead: '' }, invTab: 'upcoming', custQ: '' };
+
+/* ---------- components ---------- */
+const swatch = (c, extra = '') => `<span class="swatch" style="--h:${c.hue}" ${extra}>${c.initials}</span>`;
+const stageChip = s => `<span class="chip ${STAGE[s].c}">${STAGE[s].l}</span>`;
+const invChip = s => `<span class="chip ${INV_META[s][1]}">${INV_META[s][0]}</span>`;
+function segHTML(g, opts = {}) {
+  const w = `--w:${g.sf}`;
+  if (g.kind === 'vac') {
+    const m = opts.match && opts.match.has(g.key + '#' + g.idx), best = opts.best === g.key + '#' + g.idx;
+    return `<button class="seg vac ${m ? 'match' : ''} ${best ? 'best' : ''}" style="${w}" data-seg="${g.key}#${g.idx}" title="Vacant · ${sqft(g.sf)}"><b>${best ? '★ Best fit' : 'Vacant'}</b><small>${sqft(g.sf)}</small></button>`;
+  }
+  const c = CUST[g.cust];
+  if (g.kind === 'res') return `<button class="seg res" style="${w};--h:${c.hue}" data-seg="${g.key}#${g.idx}" title="Reserved · ${c.name}"><b>${c.name}</b><small>Reserved · ${sqft(g.sf)}</small></button>`;
+  const st = conStatus(CON[g.con]);
+  const mine = opts.mine === g.cust ? 'mine' : '';
+  return `<button class="seg ${st.k === 'expiring' || st.k === 'notice' ? 'exp' : ''} ${mine}" style="${w};--h:${c.hue}" data-seg="${g.key}#${g.idx}" title="${c.name} · ${sqft(g.sf)}"><b>${c.name}</b><small>${sqft(g.sf)}</small></button>`;
+}
+function floorBar(fl, opts) { return `<div class="bar">${fl.segs.map(g => segHTML(g, opts)).join('')}</div>`; }
+
+/* ---------- views ---------- */
+function viewDashboard() {
+  const L = structStats(LIVE), P = structStats(P2);
+  const monthly = CONTRACTS.reduce((a, c) => a + c.monthly, 0);
+  const od = INVOICES.filter(i => i.status === 'overdue');
+  const renew = CONTRACTS.filter(c => ['expiring', 'notice'].includes(conStatus(c).k));
+  const att = attention();
+  const groups = [
+    ['Block A', [STRUCT.A], 'G+3', 'A'], ['Block B', [STRUCT.B], 'G+4', 'B'], ['Block C', [STRUCT.C], 'G+4', 'C'],
+    ['Industrial sheds', LIVE.filter(s => s.type === 'shed'), '15 sheds', 'sheds'],
+  ];
+  const toSend = INVOICES.filter(i => i.status === 'upcoming');
+  // renewal chart: next 12 months
+  const months = Array.from({ length: 12 }, (_, i) => new Date(2026, 11 + i, 1));
+  const byM = months.map(m => CONTRACTS.filter(c => c.end.getFullYear() === m.getFullYear() && c.end.getMonth() === m.getMonth()).reduce((a, c) => a + c.monthly, 0));
+  const maxM = Math.max(...byM, 1);
+  const leads = LEADS.filter(l => LEAD_STAGES.includes(l.stage));
+  const maxN = Math.max(...LEAD_STAGES.map(s => leads.filter(l => l.stage === s).length), 1);
+  return `
+  <div class="kpis">
+    <div class="card kpi"><div class="l">${ic('spaces', 14)}Occupancy · live park</div><div class="v">${L.occ}%</div><div class="s"><span class="up">▲ 1.8 pts</span> vs Oct · ${sqft(L.leased)} let</div></div>
+    <div class="card kpi"><div class="l">${ic('rupee', 14)}Monthly contract value</div><div class="v">${inr(monthly)}</div><div class="s">${CONTRACTS.length} contracts · ${CUST_ROWS.length} tenants</div></div>
+    <div class="card kpi"><div class="l">${ic('grid', 14)}Vacant now</div><div class="v">${sqft(L.vac)}</div><div class="s">${L.vacUnits} spaces · smallest ${sqft(Math.min(...Object.values(FLOORS).filter(f => !f.s.phase).flatMap(f => f.segs.filter(g => g.kind === 'vac').map(g => g.sf))))}</div></div>
+    <div class="card kpi"><div class="l">${ic('alert', 14)}Overdue</div><div class="v ${od.length ? 'down' : ''}">${inr(od.reduce((a, i) => a + i.total, 0))}</div><div class="s">${od.length} invoices · oldest ${od.length ? days(od[0].due, TODAY) + 'd' : '—'}</div></div>
+    <div class="card kpi"><div class="l">${ic('clock', 14)}Up for renewal · 90d</div><div class="v amber">${renew.length}</div><div class="s">${inr(renew.reduce((a, c) => a + c.monthly, 0))}/mo at stake</div></div>
+  </div>
+  <div class="dash">
+    <div class="stack">
+      <section class="card">
+        <div class="card-h"><h3>Occupancy by block</h3><span class="sub">live park · ${sqft(L.total)}</span><a class="btn sm ghost r" href="#/spaces">Open spaces ${ic('arrow', 14)}</a></div>
+        ${groups.map(([n, list, sub, f]) => { const s = structStats(list); return `
+          <a class="occ-row" href="#/spaces" data-filter="${f}">
+            <div class="t">${n}<small>${sub} · ${sqft(s.total)}</small></div>
+            <div class="meter" aria-label="${s.occ}% occupied"><i style="width:${s.occ}%"></i></div>
+            <div class="r"><b>${s.occ}%</b> <span class="muted small hide-m">· ${sqft(s.vac)} free</span></div>
+            <div class="r num hide-m">${inr(s.value)}<span class="muted small">/mo</span></div>
+          </a>`; }).join('')}
+        <a class="occ-row" href="#/spaces" data-filter="p2">
+          <div class="t">Phase 2 <span class="chip violet plain" style="margin-left:4px">Pre-leasing</span><small>Blocks D, E · Shed 16 · ${sqft(P.total)}</small></div>
+          <div class="meter"><i style="width:${P.occ}%;background:linear-gradient(90deg,#7c63e0,#5b3fc4)"></i></div>
+          <div class="r"><b>${P.occ}%</b> <span class="muted small hide-m">reserved</span></div>
+          <div class="r muted small hide-m">${LEADS.filter(l => l.need && l.need.p2 && LEAD_STAGES.includes(l.stage)).length} deals open</div>
+        </a>
+      </section>
+      <section class="card">
+        <div class="card-h"><h3>Invoices to raise in Tally</h3><span class="sub">next 3 weeks</span><a class="btn sm ghost r" href="#/invoices">All invoices ${ic('arrow', 14)}</a></div>
+        <table><thead><tr><th>Tenant</th><th>Contract</th><th>Raise on</th><th class="r">Amount + GST</th><th></th></tr></thead><tbody>
+        ${toSend.slice(0, 7).map(i => { const c = CUST[i.cust]; const d = days(TODAY, i.issue); return `
+          <tr class="click" data-goto="#/customers/${c.id}"><td><div class="cust-cell">${swatch(c)}<span class="name">${c.name}</span></div></td>
+          <td class="muted">${i.con}</td><td>${d === 0 ? '<span class="chip warn">Today</span>' : fmtShort(i.issue) + ` <span class="muted small">· in ${d}d</span>`}</td>
+          <td class="r num"><b>${inrFull(i.total)}</b></td><td class="r"><button class="btn sm" data-act="send" data-id="${i.id}">${ic('send', 13)}Mark sent</button></td></tr>`; }).join('')}
+        </tbody></table>
+      </section>
+      <section class="card">
+        <div class="card-h"><h3>Contract value expiring</h3><span class="sub">monthly value whose contracts end each month · Dec 26 – Nov 27</span></div>
+        <div class="card-b"><div class="chart" role="img" aria-label="Monthly contract value expiring per month">
+          ${byM.map((v, i) => `<div class="col"><span class="val">${v ? inr(v).replace('₹', '₹') : ''}</span><div class="bar ${v ? (i < 3 ? 'hot' : '') : 'zero'}" style="height:${v ? Math.max(8, v / maxM * 120) : 3}px;animation-delay:${i * 30}ms" title="${fmtMon(months[i])}: ${inrFull(v)}"></div><span class="m">${months[i].toLocaleDateString('en-IN', { month: 'short' })}</span></div>`).join('')}
+        </div><div class="small muted" style="margin-top:10px">Amber bars are inside 90 days. Start renewal talks or line up replacement tenants for those spaces.</div></div>
+      </section>
+    </div>
+    <div class="stack">
+      <section class="card">
+        <div class="card-h"><h3>Needs attention</h3><span class="chip danger plain">${att.length}</span></div>
+        ${att.map(a => `<a class="att" href="${a.href}"><div class="ic ${a.c}">${ic(a.icon, 15)}</div><div class="w"><div class="top-line"><span class="who">${a.who}</span><span class="chip ${a.c === 'violet' ? 'violet' : a.c} plain">${a.tag}</span></div><div class="what">${a.what}</div></div></a>`).join('')}
+      </section>
+      <section class="card">
+        <div class="card-h"><h3>Leasing pipeline</h3><span class="sub">${leads.length} open · ${inr(leads.reduce((a, l) => a + l.est, 0))}/mo potential</span><a class="btn sm ghost r" href="#/pipeline">Board ${ic('arrow', 14)}</a></div>
+        <div class="card-b"><div class="funnel">
+          ${LEAD_STAGES.map(s => { const ls = leads.filter(l => l.stage === s); return `<a href="#/pipeline"><span>${STAGE[s].l}</span><div class="fb"><i style="width:${ls.length / maxN * 100}%"></i></div><b class="r">${ls.length}</b><span class="r muted small num">${inr(ls.reduce((a, l) => a + l.est, 0))}</span></a>`; }).join('')}
+        </div></div>
+      </section>
+    </div>
+  </div>`;
+}
+
+function matchSet() {
+  const f = state.find, need = +f.sf;
+  if (!need) return null;
+  const list = [];
+  Object.values(FLOORS).forEach(fl => fl.segs.forEach(g => {
+    if (g.kind !== 'vac' || g.sf < need) return;
+    if (f.type !== 'any' && fl.s.type !== f.type) return;
+    if (!f.p2 && fl.s.phase) return;
+    list.push({ g, fl, left: g.sf - need });
+  }));
+  list.sort((a, b) => a.left - b.left || (a.fl.s.phase ? 1 : 0) - (b.fl.s.phase ? 1 : 0));
+  return list;
+}
+
+function viewSpaces() {
+  const L = structStats(LIVE);
+  const filters = [['all', 'All'], ['A', 'Block A'], ['B', 'Block B'], ['C', 'Block C'], ['sheds', 'Sheds'], ['p2', 'Phase 2']];
+  const f = state.spacesFilter;
+  const show = s => f === 'all' || f === s.id || (f === 'sheds' && s.type === 'shed' && !s.phase) || (f === 'p2' && s.phase === 2);
+  const matches = matchSet();
+  const mset = matches ? new Set(matches.map(m => m.g.key + '#' + m.g.idx)) : null;
+  const best = matches && matches[0] ? matches[0].g.key + '#' + matches[0].g.idx : null;
+  const opts = { match: mset, best };
+  const leadOpts = LEADS.filter(l => l.need && LEAD_STAGES.includes(l.stage));
+
+  const bCard = s => {
+    const st = structStats([s]);
+    return `<section class="card ${s.phase ? 'p2' : ''}" id="st-${s.id}">
+      <div class="bldg-h"><div class="ic">${ic(s.phase ? 'crane' : 'building', 18)}</div>
+        <div class="t">${s.name}${s.phase ? `<span class="badge">Ready ${s.ready}</span>` : ''}<small>${s.spec}</small></div>
+        <div class="stats"><div><b>${sqft(st.total)}</b>total</div><div><b>${st.occ}%</b>${s.phase ? 'reserved' : 'occupied'}</div><div><b>${s.phase ? '—' : inr(st.value)}</b>per month</div></div></div>
+      <div class="floors">${[...floorsOf(s)].reverse().map(fl => { const lt = fl.segs.filter(g => g.kind !== 'vac').reduce((a, g) => a + g.sf, 0); return `
+        <div class="floor"><span class="flabel">${FLOOR_LABEL[fl.f]}</span>${floorBar(fl, opts)}<span class="fpct">${Math.round(lt / fl.sf * 100)}%</span></div>`; }).join('')}</div>
+    </section>`;
+  };
+  const sCard = s => {
+    const fl = floorsOf(s)[0], st = structStats([s]);
+    return `<section class="card shed ${s.phase ? 'p2' : ''}" id="st-${s.id}"><div class="shed-h">${ic(s.phase ? 'crane' : 'shed', 15)}<b>${s.name}</b><span class="muted">${sqft(s.per)}</span>${s.phase ? `<span class="badge">Ready ${s.ready}</span>` : ''}<span class="r">${s.phase ? '' : st.value ? inr(st.value) + '/mo' : '<span class="chip plain">Vacant</span>'}</span></div>${floorBar(fl, opts)}</section>`;
+  };
+  const tableView = () => {
+    const rows = STRUCTS.filter(show).flatMap(s => floorsOf(s).map(fl => ({ s, fl })));
+    return `<section class="card"><table><thead><tr><th>Space</th><th>Type</th><th class="r">Area</th><th style="width:28%">Occupancy</th><th>Tenants</th><th class="r">Vacant</th><th class="r">Monthly value</th></tr></thead><tbody>
+      ${rows.map(({ s, fl }) => { const occ = fl.segs.filter(g => g.kind !== 'vac'); const lt = occ.reduce((a, g) => a + g.sf, 0); const vac = fl.sf - lt; const val = occ.filter(g => g.kind === 'occ').reduce((a, g) => a + CON[g.con].monthly * g.sf / CON[g.con].sf, 0);
+        return `<tr><td class="name">${spaceName(s.id, fl.f)}${s.phase ? ' <span class="chip violet plain">Phase 2</span>' : ''}</td><td class="muted">${s.type === 'shed' ? 'Shed' : 'Building'}</td><td class="r">${sqft(fl.sf)}</td>
+        <td><div class="meter"><i style="width:${lt / fl.sf * 100}%"></i></div></td>
+        <td>${occ.map(g => `<a href="#/customers/${g.cust}" style="text-decoration:none" title="${CUST[g.cust].name}">${swatch(CUST[g.cust])}</a>`).join(' ') || '<span class="muted">—</span>'}</td>
+        <td class="r ${vac ? '' : 'muted'}">${vac ? sqft(vac) : '—'}</td><td class="r num">${val ? inr(val) : '—'}</td></tr>`; }).join('')}
+    </tbody></table></section>`;
+  };
+  const builds = STRUCTS.filter(s => show(s) && s.type === 'building' && !s.phase);
+  const sheds = STRUCTS.filter(s => show(s) && s.type === 'shed' && !s.phase);
+  const p2 = STRUCTS.filter(s => show(s) && s.phase);
+  return `
+  <div class="toolbar">
+    <div class="seg-ctl" role="tablist">${filters.map(([k, l]) => `<button class="${f === k ? 'on' : ''}" data-filter="${k}">${l}</button>`).join('')}</div>
+    <span class="sp"></span>
+    <div class="legend"><span><i class="lg-vac"></i>Vacant</span><span><i class="lg-exp"></i>Ending ≤ 90d / notice</span><span><i class="lg-res"></i>Reserved</span></div>
+    <div class="seg-ctl"><button class="${state.spacesMode === 'visual' ? 'on' : ''}" data-mode="visual" aria-label="Visual">${ic('grid', 14)}</button><button class="${state.spacesMode === 'table' ? 'on' : ''}" data-mode="table" aria-label="Table">${ic('list', 14)}</button></div>
+  </div>
+  <section class="card find">
+    <div class="ttl"><span class="ic">${ic('sparkle', 15)}</span>Find a space</div>
+    <label class="lbl">For an enquiry<select class="field" id="fLead"><option value="">Pick a lead (optional)</option>${leadOpts.map(l => `<option value="${l.id}" ${state.find.lead === l.id ? 'selected' : ''}>${l.name} · ${sqft(l.need.sf)}</option>`).join('')}</select></label>
+    <label class="lbl">Needs at least<input class="field" id="fSf" type="number" min="0" step="500" placeholder="e.g. 3000" value="${state.find.sf}" style="width:130px"></label>
+    <label class="lbl">Type<select class="field" id="fType">${[['any', 'Any'], ['building', 'Building floor'], ['shed', 'Shed']].map(([v, l]) => `<option value="${v}" ${state.find.type === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label class="lbl" style="flex-direction:row;align-items:center;gap:6px;height:34px"><input type="checkbox" id="fP2" ${state.find.p2 ? 'checked' : ''}>Include Phase 2</label>
+    ${matches ? `<button class="btn ghost" data-act="clearFind">Clear</button>` : ''}
+    <span class="muted small" style="margin-left:auto;align-self:center">Live park: <b>${sqft(L.vac)}</b> free across ${L.vacUnits} spaces</span>
+  </section>
+  ${matches ? `<div class="results">${matches.length ? `<span class="small muted">${matches.length} space${matches.length > 1 ? 's' : ''} fit ${sqft(+state.find.sf)}:</span>` + matches.slice(0, 8).map((m, i) => `<button class="res ${i === 0 ? 'best' : ''}" data-jump="${m.g.key}#${m.g.idx}">${i === 0 ? '<span class="tag">Best fit</span>' : ''}${spaceName(m.fl.s.id, m.fl.f)} · ${sqft(m.g.sf)}${m.left ? `<span class="muted small">+${sqft(m.left)} spare</span>` : ''}</button>`).join('') : `<span class="small muted">Nothing vacant fits ${sqft(+state.find.sf)}. Try Phase 2, or check notices: ${CONTRACTS.filter(c => c.notice).map(c => `${CUST[c.cust].name} frees ${sqft(c.sf)} on ${fmtShort(c.end)}`).join('; ')}.</span>`}</div>` : ''}
+  <div class="${matches ? 'dim' : ''}">
+  ${state.spacesMode === 'table' ? tableView() : `
+    ${builds.length ? `<div class="section-h"><h2>Buildings</h2><span class="muted">Floors from top to bottom. Block width = area.</span></div><div class="bgrid">${builds.map(bCard).join('')}</div>` : ''}
+    ${sheds.length ? `<div class="section-h"><h2>Industrial sheds</h2><span class="muted">${sheds.length} sheds · ${sqft(sheds.reduce((a, s) => a + s.per, 0))}</span></div><div class="sgrid">${sheds.map(sCard).join('')}</div>` : ''}
+    ${p2.length ? `<div class="section-h"><h2>Phase 2 · under construction</h2><span class="muted">Pre-lease space before it's built</span></div><div class="bgrid">${p2.filter(s => s.type === 'building').map(bCard).join('')}</div><div class="sgrid" style="margin-top:16px">${p2.filter(s => s.type === 'shed').map(sCard).join('')}</div>` : ''}
+  `}
+  </div>`;
+}
+
+function viewPipeline() {
+  const cols = STAGES.map(([k]) => k);
+  const card = c => {
+    const isLead = LEAD_STAGES.includes(c.stage) || c.stage === 'exited';
+    const cons = custContracts(c.id);
+    const val = isLead ? c.est : custMonthly(c.id);
+    const dIn = c.since ? days(D(c.since), TODAY) : null;
+    const meta = isLead && c.need ? `${sqft(c.need.sf)} · ${c.need.type === 'any' ? 'any space' : c.need.type === 'shed' ? 'shed' : 'building floor'}${c.need.p2 ? ' · Phase 2' : ''}`
+      : cons.map(k => k.spaces.map(s => spaceName(s[0], s[1])).join(', ')).join(' · ');
+    const exp = cons.map(conStatus).sort((a, b) => b.sev - a.sev)[0];
+    return `<a class="kcard" draggable="true" data-drag="${c.id}" href="#/customers/${c.id}">
+      <div class="t">${swatch(c)}<span>${c.name}</span></div>
+      <div class="meta"><span>${c.ind}</span><span>${meta || '—'}</span></div>
+      ${c.next ? `<div class="next">${ic('pin', 12)}${c.next[0]} · ${fmtShort(D(c.next[1]))}</div>` : ''}
+      ${exp && exp.sev >= 2 ? `<div class="next" style="background:var(--warn-soft);color:var(--warn)">${ic('clock', 12)}${exp.l}</div>` : ''}
+      <div class="foot"><span class="avatar sm" title="${TEAM[c.owner]}">${c.owner}</span><span class="val num">${c.stage === 'exited' ? '' : inr(val) + '<span class="muted">/mo' + (isLead ? ' est.' : '') + '</span>'}</span>${dIn !== null && isLead ? `<span class="days">${dIn}d in stage</span>` : ''}</div>
+    </a>`;
+  };
+  return `
+  <div class="toolbar"><span class="muted">Drag a card to move it to another stage. Tenants and leads share one pipeline.</span><span class="sp"></span>
+    <button class="btn" data-act="new">${ic('plus', 14)}New enquiry</button></div>
+  <div class="board">${cols.map(s => { const cs = CUSTOMERS.filter(c => c.stage === s); const v = cs.reduce((a, c) => a + (LEAD_STAGES.includes(s) ? c.est || 0 : s === 'exited' ? 0 : custMonthly(c.id)), 0);
+    return `<div class="kcol" data-stage="${s}"><div class="kcol-h"><span class="chip ${STAGE[s].c} plain" style="padding:0;background:none">●</span><b>${STAGE[s].l}</b><span class="n">${cs.length}</span><span class="v num">${v ? inr(v) : ''}</span></div>${cs.map(card).join('') || '<div class="empty small">Drop here</div>'}</div>`; }).join('')}</div>`;
+}
+
+function viewCustomers() {
+  const q = state.custQ.toLowerCase();
+  const list = CUSTOMERS.filter(c => !q || (c.name + c.ind + c.contact).toLowerCase().includes(q))
+    .sort((a, b) => custMonthly(b.id) - custMonthly(a.id) || (b.est || 0) - (a.est || 0));
+  return `
+  <div class="toolbar"><input class="field" id="custQ" placeholder="Search name, industry, contact…" value="${state.custQ}" style="width:320px"><span class="sp"></span><span class="muted small">${CUST_ROWS.length} tenants · ${LEADS.length} leads & past</span></div>
+  <section class="card"><table><thead><tr><th>Customer</th><th>Stage</th><th>Spaces</th><th class="r">Area</th><th class="r">Monthly value</th><th>Next invoice</th><th>Contract ends</th><th>Owner</th></tr></thead><tbody>
+  ${list.map(c => { const cons = custContracts(c.id); const ni = nextInvoice(c.id); const end = cons.map(k => k.end).sort((a, b) => a - b)[0]; const st = cons.map(conStatus).sort((a, b) => b.sev - a.sev)[0];
+    return `<tr class="click" data-goto="#/customers/${c.id}"><td><div class="cust-cell">${swatch(c)}<div><div class="name">${c.name}</div><div class="muted small">${c.ind}</div></div></div></td>
+    <td>${stageChip(c.stage)}</td><td class="small">${cons.flatMap(k => k.spaces.map(s => spaceName(s[0], s[1]))).join(', ') || (c.need ? `<span class="muted">wants ${sqft(c.need.sf)}</span>` : '<span class="muted">—</span>')}</td>
+    <td class="r">${cons.length ? sqft(custSf(c.id)) : '—'}</td><td class="r num"><b>${cons.length ? inr(custMonthly(c.id)) : c.est ? `<span class="muted">${inr(c.est)} est.</span>` : '—'}</b></td>
+    <td>${ni ? fmtShort(ni.issue) : '<span class="muted">—</span>'}</td><td>${end ? `${fmtDate(end)}${st && st.sev >= 2 ? ` <span class="chip ${st.c} plain">${st.k === 'notice' ? 'Notice' : st.l}</span>` : ''}` : '<span class="muted">—</span>'}</td>
+    <td><span class="avatar sm" title="${TEAM[c.owner]}">${c.owner}</span></td></tr>`; }).join('')}
+  </tbody></table></section>`;
+}
+
+function viewCustomer(id) {
+  const c = CUST[id]; if (!c) return '<div class="empty">Customer not found.</div>';
+  const cons = custContracts(id), invs = INVOICES.filter(i => i.cust === id).slice().reverse();
+  const isLead = !cons.length;
+  const ni = nextInvoice(id);
+  const outstanding = invs.filter(i => ['sent', 'overdue'].includes(i.status)).reduce((a, i) => a + i.total, 0);
+  const events = [];
+  cons.forEach(k => { events.push({ d: k.start, t: `Contract ${k.id} started`, s: k.spaces.map(s => spaceName(s[0], s[1])).join(', '), c: '' }); if (k.notice) events.push({ d: addDays(TODAY, -21), t: 'Notice to vacate received', s: `${k.id} · leaving ${fmtDate(k.end)}`, c: 'danger' }); });
+  invs.slice(0, 6).forEach(i => { if (i.status === 'paid') events.push({ d: i.paidOn, t: `Payment received · ${inrFull(i.total)}`, s: i.no, c: 'ok' }); if (i.status === 'overdue') events.push({ d: i.due, t: `Invoice overdue · ${inrFull(i.total)}`, s: i.no, c: 'danger' }); if (i.status === 'sent') events.push({ d: i.issue, t: `Invoice sent · ${inrFull(i.total)}`, s: i.no, c: '' }); });
+  if (c.since && isLead) events.push({ d: D(c.since), t: `Moved to ${STAGE[c.stage].l}`, s: `by ${TEAM[c.owner]}`, c: '' });
+  if (isLead && c.stage !== 'exited') events.push({ d: addDays(D(c.since), -3), t: 'Enquiry received', s: c.need ? `Looking for ${sqft(c.need.sf)}` : '', c: '' });
+  events.sort((a, b) => b.d - a.d);
+  const kpis = isLead ? [
+    ['Est. monthly value', c.est ? inr(c.est) : '—'], ['Requirement', c.need ? sqft(c.need.sf) : '—'], ['Space type', c.need ? (c.need.type === 'any' ? 'Any' : c.need.type === 'shed' ? 'Shed' : 'Building floor') : '—'], ['Next step', c.next ? fmtShort(D(c.next[1])) : '—'],
+  ] : [
+    ['Monthly value', inr(custMonthly(id))], ['Area leased', sqft(custSf(id))], ['Outstanding', outstanding ? inrFull(outstanding) : '₹0'], ['Next invoice', ni ? fmtShort(ni.issue) : '—'], ['Tenant since', fmtMon(cons.map(k => k.start).sort((a, b) => a - b)[0])],
+  ];
+  const fits = isLead && c.need ? (() => { state.find = { sf: String(c.need.sf), type: c.need.type, p2: !!c.need.p2, lead: c.id }; const m = matchSet(); state.find = { sf: '', type: 'any', p2: false, lead: '' }; return m; })() : null;
+  return `
+  <div class="c-head">${swatch(c)}<div><h2>${c.name}</h2><div class="sub">${stageChip(c.stage)}<span>${c.ind}</span><span>·</span><span>${c.contact}</span><span>·</span><span>${c.phone}</span></div></div>
+    <div class="acts"><button class="btn" data-act="call">${ic('phone', 14)}Call</button><button class="btn" data-act="update">${ic('send', 14)}Send update</button>${isLead ? `<button class="btn primary" data-act="convert">${ic('file', 14)}Create contract</button>` : `<button class="btn primary" data-act="raise">${ic('invoice', 14)}Raise invoice</button>`}</div></div>
+  <div class="kpis" style="grid-template-columns:repeat(${kpis.length},minmax(0,1fr))">${kpis.map(([l, v]) => `<div class="card kpi"><div class="l">${l}</div><div class="v" style="font-size:20px">${v}</div></div>`).join('')}</div>
+  <div class="cgrid"><div class="stack">
+    ${cons.length ? `<section class="card"><div class="card-h"><h3>Spaces rented</h3><span class="sub">their blocks are highlighted on each floor</span></div>
+      ${cons.flatMap(k => k.spaces.map(([sid, f, sf]) => `<div class="space-row"><div><div class="name">${spaceName(sid, f)}</div><div class="muted small">${sqft(sf)} · ${k.id}</div></div>${floorBar(FLOORS[sid + '|' + f], { mine: id })}<div class="r small muted">of ${sqft(FLOORS[sid + '|' + f].sf)}</div></div>`)).join('')}</section>` : ''}
+    ${fits ? `<section class="card"><div class="card-h"><h3>Spaces that fit</h3><span class="sub">vacant, ≥ ${sqft(c.need.sf)}, smallest leftover first</span><a class="btn sm ghost r" href="#/spaces" data-findlead="${c.id}">See on map ${ic('arrow', 14)}</a></div>
+      ${fits.length ? fits.slice(0, 5).map((m, i) => `<div class="space-row"><div><div class="name">${spaceName(m.fl.s.id, m.fl.f)} ${i === 0 ? '<span class="chip info plain">Best fit</span>' : ''}</div><div class="muted small">${sqft(m.g.sf)} vacant${m.fl.s.phase ? ' · ready ' + m.fl.s.ready : ''}</div></div>${floorBar(m.fl, { match: new Set([m.g.key + '#' + m.g.idx]) })}<div class="r small muted">${m.left ? '+' + sqft(m.left) + ' spare' : 'Exact fit'}</div></div>`).join('') : '<div class="empty small">Nothing vacant fits right now.</div>'}</section>` : ''}
+    ${cons.length ? `<section class="card"><div class="card-h"><h3>Contracts</h3></div><table><thead><tr><th>Contract</th><th>Spaces</th><th class="r">Monthly value</th><th>Term</th><th>Lock-in until</th><th>Bills on</th><th>Status</th></tr></thead><tbody>
+      ${cons.map(k => { const st = conStatus(k); return `<tr><td class="name">${k.id}</td><td class="small">${k.spaces.map(s => spaceName(s[0], s[1])).join(', ')}</td><td class="r num"><b>${inrFull(k.monthly)}</b></td><td class="small">${fmtMon(k.start)} → ${fmtMon(k.end)}</td><td class="small">${fmtDate(k.lockin)}</td><td class="small">${k.day}${['st', 'nd', 'rd'][((k.day + 90) % 100 - 10) % 10 - 1] || 'th'}</td><td><span class="chip ${st.c}">${st.l}</span></td></tr>`; }).join('')}
+    </tbody></table></section>` : ''}
+    ${invs.length ? `<section class="card"><div class="card-h"><h3>Invoices</h3><span class="sub">raised in Tally, tracked here</span></div><table><thead><tr><th>Invoice</th><th>Period</th><th>Due</th><th class="r">Total</th><th>Status</th><th></th></tr></thead><tbody>
+      ${invs.map(i => invRow(i)).join('')}</tbody></table></section>` : ''}
+  </div><div class="stack">
+    <section class="card"><div class="card-h"><h3>Details</h3></div><div class="card-b"><dl class="kv">
+      <dt>Contact</dt><dd>${c.contact}</dd><dt>Phone</dt><dd>${c.phone}</dd><dt>Industry</dt><dd>${c.ind}</dd><dt>Account owner</dt><dd>${TEAM[c.owner]}</dd>
+      ${cons.length ? `<dt>GSTIN</dt><dd>19AAB${c.initials}${String(1000 + c.hue).slice(0, 4)}C1Z${c.hue % 9}</dd><dt>Tally ledger</dt><dd>${c.name}</dd>` : ''}
+    </dl></div></section>
+    <section class="card"><div class="card-h"><h3>Activity</h3></div><div class="tl">${events.slice(0, 9).map(e => `<div class="tl-i"><span class="d ${e.c}"></span><div class="w"><b>${e.t}</b><div>${fmtDate(e.d)}${e.s ? ' · ' + e.s : ''}</div></div></div>`).join('') || '<div class="empty small">No activity yet</div>'}</div></section>
+    <section class="card"><div class="card-h"><h3>Notes</h3></div><div class="card-b"><textarea class="field" style="width:100%;height:80px;padding:10px;resize:vertical" placeholder="Add a note for the team…"></textarea><div style="margin-top:8px;text-align:right"><button class="btn sm" data-act="note">Save note</button></div></div></section>
+  </div></div>`;
+}
+
+function invRow(i, withCust) {
+  const c = CUST[i.cust];
+  const act = i.status === 'upcoming' ? `<button class="btn sm" data-act="send" data-id="${i.id}">${ic('send', 13)}Mark sent</button>` : ['sent', 'overdue'].includes(i.status) ? `<button class="btn sm" data-act="paid" data-id="${i.id}">${ic('check', 13)}Mark paid</button>` : `<span class="muted small">${i.paidOn ? 'paid ' + fmtShort(i.paidOn) : ''}</span>`;
+  const dueTxt = i.status === 'overdue' ? `<span class="down">${fmtShort(i.due)} · ${days(i.due, TODAY)}d late</span>` : fmtShort(i.due);
+  if (withCust) return `<tr><td class="name">${i.no || '<span class="muted">Draft</span>'}</td><td><a href="#/customers/${c.id}" style="text-decoration:none" class="cust-cell">${swatch(c)}<span class="name">${c.name}</span></a></td><td class="muted small">${i.con}</td><td>${fmtMon(i.period)}</td><td>${fmtShort(i.issue)}</td><td>${dueTxt}</td><td class="r num">${inrFull(i.amount)}</td><td class="r num muted">${inrFull(i.gst)}</td><td class="r num"><b>${inrFull(i.total)}</b></td><td>${invChip(i.status)}</td><td class="r">${act}</td></tr>`;
+  return `<tr><td class="name">${i.no || '<span class="muted">Draft</span>'}</td><td>${fmtMon(i.period)}</td><td>${dueTxt}</td><td class="r num"><b>${inrFull(i.total)}</b></td><td>${invChip(i.status)}</td><td class="r">${act}</td></tr>`;
+}
+
+function viewInvoices() {
+  const by = s => INVOICES.filter(i => i.status === s);
+  const sum = l => l.reduce((a, i) => a + i.total, 0);
+  const novPaid = INVOICES.filter(i => i.status === 'paid' && i.issue.getMonth() === 10);
+  const tabs = [['upcoming', 'To send'], ['sent', 'Awaiting payment'], ['overdue', 'Overdue'], ['paid', 'Paid'], ['all', 'All']];
+  const list = (state.invTab === 'all' ? INVOICES : by(state.invTab)).slice().sort((a, b) => state.invTab === 'upcoming' ? a.issue - b.issue : b.issue - a.issue);
+  return `
+  <div class="sum4">
+    <div class="card kpi"><div class="l">${ic('send', 14)}To raise · next 3 weeks</div><div class="v">${inr(sum(by('upcoming')))}</div><div class="s">${by('upcoming').length} invoices</div></div>
+    <div class="card kpi"><div class="l">${ic('clock', 14)}Awaiting payment</div><div class="v">${inr(sum(by('sent')))}</div><div class="s">${by('sent').length} invoices · not yet due</div></div>
+    <div class="card kpi"><div class="l">${ic('alert', 14)}Overdue</div><div class="v down">${inr(sum(by('overdue')))}</div><div class="s">${by('overdue').length} invoices</div></div>
+    <div class="card kpi"><div class="l">${ic('check', 14)}Collected · Nov</div><div class="v up">${inr(sum(novPaid))}</div><div class="s">${novPaid.length} of ${INVOICES.filter(i => i.issue.getMonth() === 10 && i.status !== 'upcoming').length} Nov invoices paid</div></div>
+  </div>
+  <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="${state.invTab === k ? 'on' : ''}" data-tab="${k}">${l}<span class="n">${k === 'all' ? INVOICES.length : by(k).length}</span></button>`).join('')}
+    <span style="margin-left:auto;display:flex;align-items:center"><button class="btn sm" data-act="csv">${ic('download', 13)}Export for Tally</button></span></div>
+  <section class="card"><table><thead><tr><th>Invoice #</th><th>Tenant</th><th>Contract</th><th>Period</th><th>Raise on</th><th>Due</th><th class="r">Amount</th><th class="r">GST 18%</th><th class="r">Total</th><th>Status</th><th></th></tr></thead><tbody>
+  ${list.map(i => invRow(i, true)).join('') || '<tr><td colspan="11" class="empty">Nothing here. You\'re all caught up.</td></tr>'}
+  </tbody></table></section>`;
+}
+
+/* ---------- drawer ---------- */
+function openSeg(ref) {
+  const [key, idx] = ref.split('#'); const fl = FLOORS[key]; const g = fl.segs[+idx];
+  let body;
+  if (g.kind === 'vac') {
+    const leads = LEADS.filter(l => l.need && LEAD_STAGES.includes(l.stage) && l.need.sf <= g.sf && (l.need.type === 'any' || l.need.type === fl.s.type) && (!fl.s.phase || l.need.p2 || true))
+      .sort((a, b) => (b.need.sf / g.sf) - (a.need.sf / g.sf));
+    body = `<div class="drawer-h"><div class="swatch" style="--h:210;background:repeating-linear-gradient(135deg,#f3f6f9 0 4px,#e3e8ef 4px 8px);color:var(--text-2)">${ic('grid', 14)}</div><div><b>Vacant · ${spaceName(fl.s.id, fl.f)}</b><div class="muted small">${sqft(g.sf)} available${fl.s.phase ? ' · ready ' + fl.s.ready : ' now'}</div></div><button class="btn ghost x" data-act="close" aria-label="Close">${ic('x')}</button></div>
+    <div class="drawer-b">
+      <div class="box"><h4>Space</h4><dl class="kv"><dt>Location</dt><dd>${spaceName(fl.s.id, fl.f)}</dd><dt>Free area</dt><dd>${sqft(g.sf)}</dd><dt>Floor / shed size</dt><dd>${sqft(fl.sf)}</dd><dt>Type</dt><dd>${fl.s.type === 'shed' ? 'Industrial shed' : 'Building floor'}</dd><dt>Spec</dt><dd>${fl.s.spec}</dd></dl></div>
+      <div class="box"><h4>${ic('sparkle', 12)} Leads that fit</h4>${leads.length ? leads.map(l => `<div class="match-row">${swatch(l)}<div style="flex:1;min-width:0"><a href="#/customers/${l.id}" class="name" style="text-decoration:none">${l.name}</a><div class="muted small">needs ${sqft(l.need.sf)} · ${STAGE[l.stage].l}</div></div><span class="chip info plain">${Math.round(l.need.sf / g.sf * 100)}% fill</span></div>`).join('') : '<div class="muted small">No open lead fits this size. Promote it to enquiries from brokers, 99acres or IndiaMART.</div>'}</div>
+      <div style="display:flex;gap:8px"><button class="btn primary" data-act="propose">${ic('send', 14)}Send to a lead</button><button class="btn" data-act="hold">${ic('lock', 14)}Put on hold</button></div>
+    </div>`;
+  } else {
+    const c = CUST[g.cust];
+    if (g.kind === 'res') {
+      body = `<div class="drawer-h">${swatch(c)}<div><b>${c.name}</b><div class="muted small">Reserved · ${spaceName(fl.s.id, fl.f)}</div></div><button class="btn ghost x" data-act="close" aria-label="Close">${ic('x')}</button></div>
+      <div class="drawer-b"><div class="box"><h4>Pre-lease</h4><dl class="kv"><dt>Stage</dt><dd>${STAGE[c.stage].l}</dd><dt>Area</dt><dd>${sqft(g.sf)}</dd><dt>Est. monthly</dt><dd>${inrFull(c.est)}</dd><dt>Space ready</dt><dd>${fl.s.ready}</dd><dt>Next step</dt><dd>${c.next ? c.next[0] + ' · ' + fmtShort(D(c.next[1])) : '—'}</dd></dl></div>
+      <a class="btn primary" href="#/customers/${c.id}">Open ${c.name} ${ic('arrow', 14)}</a></div>`;
+    } else {
+      const k = CON[g.con], st = conStatus(k), ni = INVOICES.find(i => i.con === k.id && i.status === 'upcoming');
+      const open = INVOICES.filter(i => i.con === k.id && ['sent', 'overdue'].includes(i.status));
+      body = `<div class="drawer-h">${swatch(c)}<div><b>${c.name}</b><div class="muted small">${spaceName(fl.s.id, fl.f)} · ${sqft(g.sf)}</div></div><button class="btn ghost x" data-act="close" aria-label="Close">${ic('x')}</button></div>
+      <div class="drawer-b">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">${stageChip(c.stage)}<span class="chip ${st.c}">${st.l}</span>${open.some(i => i.status === 'overdue') ? '<span class="chip danger">Payment overdue</span>' : ''}</div>
+        <div class="box"><h4>Contract ${k.id}</h4><dl class="kv"><dt>Monthly value</dt><dd>${inrFull(k.monthly)} + GST</dd><dt>Covers</dt><dd>${k.spaces.map(s => spaceName(s[0], s[1])).join(', ')}</dd><dt>Term</dt><dd>${fmtDate(k.start)} → ${fmtDate(k.end)}</dd><dt>Lock-in until</dt><dd>${fmtDate(k.lockin)}</dd><dt>Days left</dt><dd>${days(TODAY, k.end)}</dd></dl></div>
+        <div class="box"><h4>Billing</h4><dl class="kv"><dt>Next invoice</dt><dd>${ni ? fmtDate(ni.issue) + ' · ' + inrFull(ni.total) : 'Bills on day ' + k.day}</dd><dt>Outstanding</dt><dd class="${open.some(i => i.status === 'overdue') ? 'down' : ''}">${open.length ? inrFull(open.reduce((a, i) => a + i.total, 0)) : '₹0'}</dd></dl></div>
+        <div class="box"><h4>Contact</h4><dl class="kv"><dt>Name</dt><dd>${c.contact}</dd><dt>Phone</dt><dd>${c.phone}</dd><dt>Owner</dt><dd>${TEAM[c.owner]}</dd></dl></div>
+        <div style="display:flex;gap:8px"><a class="btn primary" href="#/customers/${c.id}">Open tenant ${ic('arrow', 14)}</a><button class="btn" data-act="update">${ic('send', 14)}Send update</button></div>
+      </div>`;
+    }
+  }
+  const dr = $('#drawer'); dr.innerHTML = body; dr.classList.add('on'); dr.setAttribute('aria-hidden', 'false'); $('#scrim').classList.add('on');
+  setTimeout(() => dr.querySelector('[data-act=close]')?.focus(), 50);
+}
+function closeDrawer() { $('#drawer').classList.remove('on'); $('#drawer').setAttribute('aria-hidden', 'true'); $('#scrim').classList.remove('on'); }
+
+/* ---------- palette ---------- */
+let palItems = [], palIdx = 0;
+function palRender() {
+  const q = $('#palIn').value.toLowerCase().trim();
+  const all = [
+    ...[['Dashboard', '#/dashboard', 'home'], ['Spaces', '#/spaces', 'spaces'], ['Pipeline', '#/pipeline', 'pipeline'], ['Customers', '#/customers', 'users'], ['Invoices', '#/invoices', 'invoice']].map(([n, h, i]) => ({ n, h, i, k: 'Page' })),
+    ...CUSTOMERS.map(c => ({ n: c.name, h: '#/customers/' + c.id, i: 'users', k: STAGE[c.stage].l })),
+    ...STRUCTS.map(s => ({ n: s.name, h: '#/spaces', i: s.type === 'shed' ? 'shed' : 'building', k: s.phase ? 'Phase 2' : sqft(s.per * s.floors.length), filter: s.phase ? 'p2' : s.type === 'shed' ? 'sheds' : s.id })),
+    ...INVOICES.filter(i => i.no).map(i => ({ n: `${i.no} · ${CUST[i.cust].name}`, h: '#/customers/' + i.cust, i: 'invoice', k: INV_META[i.status][0] })),
+  ];
+  palItems = (q ? all.filter(x => x.n.toLowerCase().includes(q)) : all.slice(0, 12)).slice(0, 12);
+  palIdx = Math.min(palIdx, Math.max(0, palItems.length - 1));
+  $('#palList').innerHTML = palItems.map((x, i) => `<li class="${i === palIdx ? 'on' : ''}" data-pal="${i}">${ic(x.i, 15)}<span>${x.n}</span><span class="k">${x.k}</span></li>`).join('') || '<li class="muted">No matches</li>';
+}
+function palOpen() { $('#palette').classList.add('on'); $('#scrim').classList.add('on'); $('#palIn').value = ''; palIdx = 0; palRender(); setTimeout(() => $('#palIn').focus(), 30); }
+function palClose() { $('#palette').classList.remove('on'); if (!$('#drawer').classList.contains('on')) $('#scrim').classList.remove('on'); }
+function palGo(i) { const x = palItems[i]; if (!x) return; if (x.filter) state.spacesFilter = x.filter; palClose(); location.hash = x.h; if (x.h === location.hash) render(); }
+
+/* ---------- toast ---------- */
+let tt; function toast(msg) { const t = $('#toast'); t.innerHTML = ic('check', 15) + msg; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2600); }
+
+/* ---------- shell + router ---------- */
+function renderNav(page) {
+  const od = INVOICES.filter(i => i.status === 'overdue').length;
+  const items = [['dashboard', 'Dashboard', 'home'], ['spaces', 'Spaces', 'spaces'], ['pipeline', 'Pipeline', 'pipeline', LEADS.filter(l => LEAD_STAGES.includes(l.stage)).length], ['customers', 'Customers', 'users'], ['invoices', 'Invoices', 'invoice', od, true]];
+  $('#nav').innerHTML = items.map(([k, l, i, n, alert]) => `<a href="#/${k}" class="${page === k ? 'on' : ''}" ${page === k ? 'aria-current="page"' : ''}>${ic(i)}<span class="lbl">${l}</span>${n ? `<span class="count ${alert ? 'alert' : ''}">${n}</span>` : ''}</a>`).join('');
+  const L = structStats(LIVE);
+  $('#sideFoot').innerHTML = `<div class="t">Kasa Industrial Park</div><div class="n">Andul Road, Howrah</div><div class="meter"><i style="width:${L.occ}%"></i></div><div class="t" style="margin-top:6px">${L.occ}% let · ${sqft(L.total)}</div>`;
+}
+function render() {
+  const [page = 'dashboard', id] = location.hash.replace(/^#\/?/, '').split('/');
+  const titles = { dashboard: 'Dashboard', spaces: 'Spaces', pipeline: 'Pipeline', customers: 'Customers', invoices: 'Invoices' };
+  renderNav(page);
+  let html;
+  if (page === 'customers' && id) { html = viewCustomer(id); $('#title').innerHTML = `<a class="crumb" href="#/customers">Customers</a><span class="muted">/</span>${CUST[id] ? CUST[id].name : ''}`; }
+  else { html = ({ dashboard: viewDashboard, spaces: viewSpaces, pipeline: viewPipeline, customers: viewCustomers, invoices: viewInvoices }[page] || viewDashboard)(); $('#title').textContent = titles[page] || 'Dashboard'; }
+  const v = $('#view'); v.innerHTML = html; v.style.animation = 'none'; v.offsetHeight; v.style.animation = '';
+  document.title = `${$('#title').textContent} · Kasa Park CRM`;
+  bindView();
+}
+function rerenderKeepScroll() { const y = scrollY; render(); scrollTo(0, y); }
+function bindView() {
+  const fSf = $('#fSf'), fType = $('#fType'), fLead = $('#fLead'), fP2 = $('#fP2'), q = $('#custQ');
+  if (fSf) {
+    const upd = () => { state.find.sf = fSf.value; state.find.type = fType.value; state.find.p2 = fP2.checked; rerenderKeepScroll(); $('#fSf').focus(); };
+    fSf.addEventListener('input', () => { clearTimeout(fSf._t); fSf._t = setTimeout(upd, 250); });
+    fType.addEventListener('change', upd); fP2.addEventListener('change', upd);
+    fLead.addEventListener('change', () => { const l = CUST[fLead.value]; state.find.lead = fLead.value; if (l) { state.find.sf = String(l.need.sf); state.find.type = l.need.type; state.find.p2 = !!l.need.p2; } rerenderKeepScroll(); });
+  }
+  if (q) q.addEventListener('input', () => { state.custQ = q.value; const pos = q.selectionStart; render(); const n = $('#custQ'); n.focus(); n.setSelectionRange(pos, pos); });
+}
+
+document.addEventListener('click', e => {
+  const t = e.target;
+  const seg = t.closest('[data-seg]'); if (seg) { e.preventDefault(); openSeg(seg.dataset.seg); return; }
+  const jump = t.closest('[data-jump]'); if (jump) { const el = document.querySelector(`[data-seg="${jump.dataset.jump}"]`); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(() => openSeg(jump.dataset.jump), 450); } return; }
+  const fl = t.closest('[data-filter]'); if (fl) { state.spacesFilter = fl.dataset.filter; if (location.hash.startsWith('#/spaces')) { e.preventDefault(); render(); } return; }
+  const fdl = t.closest('[data-findlead]'); if (fdl) { const l = CUST[fdl.dataset.findlead]; state.find = { sf: String(l.need.sf), type: l.need.type, p2: !!l.need.p2, lead: l.id }; state.spacesFilter = 'all'; return; }
+  const mode = t.closest('[data-mode]'); if (mode) { state.spacesMode = mode.dataset.mode; render(); return; }
+  const tab = t.closest('[data-tab]'); if (tab) { state.invTab = tab.dataset.tab; render(); return; }
+  const go = t.closest('[data-goto]'); if (go && !t.closest('button,a')) { location.hash = go.dataset.goto; return; }
+  const pal = t.closest('[data-pal]'); if (pal) { palGo(+pal.dataset.pal); return; }
+  const a = t.closest('[data-act]'); if (!a) return;
+  const act = a.dataset.act;
+  if (act === 'close') return closeDrawer();
+  if (act === 'clearFind') { state.find = { sf: '', type: 'any', p2: false, lead: '' }; return render(); }
+  if (act === 'send' || act === 'paid') {
+    e.preventDefault(); e.stopPropagation();
+    const inv = INVOICES.find(i => i.id === a.dataset.id); if (!inv) return;
+    if (act === 'send') { inv.status = 'sent'; inv.no = `KIP/26-27/${seq++}`; toast(`${inv.no} marked sent to ${CUST[inv.cust].name}`); }
+    else { inv.status = 'paid'; inv.paidOn = TODAY; toast(`${inrFull(inv.total)} received from ${CUST[inv.cust].name}`); }
+    return rerenderKeepScroll();
+  }
+  if (act === 'csv') {
+    const rows = (state.invTab === 'all' ? INVOICES : INVOICES.filter(i => i.status === state.invTab));
+    const csv = [['Voucher Date', 'Invoice No', 'Party Ledger', 'Contract', 'Period', 'Taxable Value', 'IGST/CGST+SGST 18%', 'Invoice Total', 'Status'].join(','),
+      ...rows.map(i => [i.issue.toISOString().slice(0, 10), i.no || 'DRAFT', `"${CUST[i.cust].name}"`, i.con, fmtMon(i.period), i.amount, i.gst, i.total, i.status].join(','))].join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const l = document.createElement('a'); l.href = url; l.download = `kasa-invoices-${state.invTab}.csv`; l.click(); URL.revokeObjectURL(url);
+    return toast(`Exported ${rows.length} rows for Tally import`);
+  }
+  const msgs = { new: 'New enquiry form: next iteration', call: 'Calling… (mockup)', update: 'Update composer: WhatsApp / email in v2', convert: 'Contract builder: next iteration', raise: 'Invoice will be raised in Tally and tracked here', note: 'Note saved', propose: 'Pick a lead to send this space to (v2)', hold: 'Space put on hold for 7 days' };
+  if (msgs[act]) { e.preventDefault(); toast(msgs[act]); }
+});
+$('#scrim').addEventListener('click', () => { closeDrawer(); palClose(); });
+$('#openPalette').addEventListener('click', palOpen);
+$('#palIn').addEventListener('input', () => { palIdx = 0; palRender(); });
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#palette').classList.contains('on') ? palClose() : palOpen(); return; }
+  if (e.key === 'Escape') { palClose(); closeDrawer(); return; }
+  if ($('#palette').classList.contains('on')) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); palIdx = Math.min(palIdx + 1, palItems.length - 1); palRender(); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); palIdx = Math.max(palIdx - 1, 0); palRender(); }
+    if (e.key === 'Enter') { e.preventDefault(); palGo(palIdx); }
+  }
+});
+/* kanban drag & drop */
+document.addEventListener('dragstart', e => { const c = e.target.closest?.('[data-drag]'); if (c) { e.dataTransfer.setData('text/plain', c.dataset.drag); e.dataTransfer.effectAllowed = 'move'; c.classList.add('dragging'); } });
+document.addEventListener('dragend', e => { e.target.closest?.('[data-drag]')?.classList.remove('dragging'); document.querySelectorAll('.kcol.over').forEach(c => c.classList.remove('over')); });
+document.addEventListener('dragover', e => { const col = e.target.closest?.('.kcol'); if (col) { e.preventDefault(); document.querySelectorAll('.kcol.over').forEach(c => c !== col && c.classList.remove('over')); col.classList.add('over'); } });
+document.addEventListener('drop', e => {
+  const col = e.target.closest?.('.kcol'); if (!col) return; e.preventDefault();
+  const c = CUST[e.dataTransfer.getData('text/plain')]; const s = col.dataset.stage;
+  if (c && c.stage !== s) { c.stage = s; c.since = TODAY.toISOString().slice(0, 10); toast(`${c.name} → ${STAGE[s].l}`); rerenderKeepScroll(); }
+});
+
+$('#icSearch').innerHTML = ic('search', 15); $('#icPlus').innerHTML = ic('plus', 14);
+window.addEventListener('hashchange', () => { closeDrawer(); render(); scrollTo(0, 0); $('#view').focus({ preventScroll: true }); });
+render();
+</script>
+</body>
+</html>
