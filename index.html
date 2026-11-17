@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kasa · Park CRM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -225,6 +225,7 @@ label.lbl{font-size:12px;font-weight:500;color:var(--text-2);display:flex;flex-d
 .kcard .foot{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px}
 .kcard .foot .val{font-weight:600}
 .kcard .foot .days{margin-left:auto;color:var(--text-3)}
+.kcard .mv{display:none;width:100%;height:32px;margin-top:10px;font-size:12.5px;color:var(--text-2)}
 .kcard .next{margin-top:8px;padding:6px 8px;border-radius:7px;background:var(--surface-2);font-size:12px;color:var(--text-2);display:flex;gap:6px;align-items:center}
 
 /* ---------- customer ---------- */
@@ -284,18 +285,77 @@ dl.kv dd{margin:0;text-align:right;font-weight:500}
 .toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,16px);opacity:0;background:#0d1b2a;color:#fff;padding:10px 16px;border-radius:10px;font-weight:500;z-index:90;transition:opacity .2s,transform .2s var(--ease);display:flex;gap:8px;align-items:center;box-shadow:var(--shadow-lg)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
-@media (max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.dash,.cgrid{grid-template-columns:1fr}}
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important}.dash,.cgrid{grid-template-columns:1fr}}
 @media (max-width:860px){
+  /* shell: sidebar becomes a bottom tab bar */
   .app{grid-template-columns:1fr}
-  .side{position:static;height:auto;flex-direction:row;align-items:center;overflow-x:auto;padding:8px 12px;gap:8px}
-  .brand{padding:0 8px 0 0}.brand span,.nav-label,.side-foot{display:none}
-  .nav{flex-direction:row}.nav a span.lbl{display:none}
-  .searchbtn{width:auto}.searchbtn .lbl,.searchbtn kbd{display:none}
-  .top,#view{padding-left:16px;padding-right:16px}
-  .kpis,.sum4{grid-template-columns:repeat(2,1fr)}
-  .occ-row{grid-template-columns:1fr 90px}.occ-row .meter,.occ-row .hide-m{display:none}
+  .main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+  .side{position:fixed;top:auto;left:0;right:0;bottom:0;height:auto;z-index:50;flex-direction:row;padding:4px 6px calc(4px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--border);background:rgba(255,255,255,.95);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px)}
+  .brand,.nav-label,.side-foot{display:none}
+  .nav{flex-direction:row;width:100%;gap:0}
+  .nav a{flex:1 1 0;min-width:0;flex-direction:column;justify-content:center;gap:3px;height:54px;padding:0 2px;font-size:11px;font-weight:500;position:relative;border-radius:10px}
+  .nav a .lbl{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nav a.on{background:none;color:var(--brand-ink)}
+  .nav a.on svg{stroke-width:2.2}
+  .nav .count{position:absolute;top:4px;left:calc(50% + 5px);margin:0;min-width:16px;height:16px;padding:0 4px;font-size:10px}
+  .toast{bottom:calc(76px + env(safe-area-inset-bottom));max-width:calc(100vw - 32px)}
+  /* header */
+  .top{height:56px;gap:8px;padding:0 16px}
+  .top h1{font-size:16px;min-width:0;white-space:nowrap;overflow:hidden}
+  .top h1 .crumb{display:none}.top h1 .crumb+.muted{display:none}
+  .searchbtn{width:36px;padding:0;justify-content:center;flex:none}.searchbtn .lbl,.searchbtn kbd{display:none}
+  .newbtn{width:36px;padding:0;justify-content:center;flex:none}.newbtn .lbl{display:none}
+  .top .avatar{display:none}
+  #view{padding:16px 16px 28px}
+  /* primitives */
+  .kpis,.sum4{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+  .kpi{padding:12px}.kpi .v{font-size:21px}
+  .card-h{flex-wrap:wrap;row-gap:4px}
+  th,td{padding:10px 12px}
+  td{white-space:nowrap}
+  /* dashboard */
+  .occ-row{grid-template-columns:1fr 64px;gap:10px}.occ-row .meter,.occ-row .hide-m{display:none}
+  .chart{gap:4px}.chart .val{display:none}
+  .funnel a{grid-template-columns:84px 1fr 22px 62px;gap:8px}
+  /* spaces */
+  .toolbar{gap:8px}
+  .toolbar .seg-ctl[role=tablist]{max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .seg-ctl button{white-space:nowrap}
+  .toolbar .sp{display:none}
+  .legend{order:3;width:100%;flex-wrap:wrap;gap:10px}
+  .find .ttl{width:100%}
+  .find .lbl{flex:1 1 140px}
+  .find .field{width:100%!important}
+  .find > .muted{margin-left:0!important;width:100%}
+  .results{flex-wrap:nowrap;overflow-x:auto;margin-left:-16px;margin-right:-16px;padding:0 16px 4px}
+  .res{flex:none}
   .bldg-h .stats{display:none}
+  .bar{height:36px}
+  .seg{padding:0 6px}
+  /* pipeline */
+  .board{grid-auto-columns:84vw;scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px 12px;scroll-padding:0 16px}
+  .kcol{scroll-snap-align:start;min-height:50vh}
+  .kcard .mv{display:block}
+  .kpis>.kpi:last-child:nth-child(odd),.sum4>.kpi:last-child:nth-child(odd){grid-column:1/-1}
+  /* customers */
+  #custQ{width:100%!important}
+  .c-head{flex-wrap:wrap;gap:12px}
+  .c-head .swatch{width:44px;height:44px;font-size:16px}
+  .c-head h2{font-size:19px}
+  .c-head .acts{margin-left:0;width:100%;flex-wrap:wrap}
+  .c-head .acts .btn{flex:1 1 0;justify-content:center;height:38px}
+  .c-head .acts .primary{order:-1;flex-basis:100%}
+  .space-row{grid-template-columns:1fr;gap:8px}
+  .space-row .r{text-align:left}
+  /* invoices */
+  .tabs{overflow-x:auto;scrollbar-width:none}
+  .tabs button{white-space:nowrap;flex:none}
+  /* overlays: drawer becomes a bottom sheet */
+  .drawer{top:auto;left:0;width:100%;max-height:88vh;border-radius:16px 16px 0 0;transform:translateY(102%);padding-bottom:env(safe-area-inset-bottom)}
+  .drawer.on{transform:none}
+  .palette{top:8vh}
 }
+@media (max-width:380px){.kpi .v{font-size:18px}.nav a{font-size:10px}}
 </style>
 </head>
 <body>
@@ -309,7 +369,7 @@ dl.kv dd{margin:0;text-align:right;font-weight:500}
     <header class="top">
       <h1 id="title">Dashboard</h1>
       <button class="searchbtn" id="openPalette" aria-label="Search"><span id="icSearch"></span><span class="lbl">Search tenants, spaces…</span><kbd>⌘K</kbd></button>
-      <button class="btn primary" data-act="new"><span id="icPlus"></span>New enquiry</button>
+      <button class="btn primary newbtn" data-act="new" aria-label="New enquiry"><span id="icPlus"></span><span class="lbl">New enquiry</span></button>
       <div class="avatar" title="Tanishq">TM</div>
     </header>
     <main id="view" tabindex="-1"></main>
@@ -745,13 +805,14 @@ function viewPipeline() {
     const meta = isLead && c.need ? `${sqft(c.need.sf)} · ${c.need.type === 'any' ? 'any space' : c.need.type === 'shed' ? 'shed' : 'building floor'}${c.need.p2 ? ' · Phase 2' : ''}`
       : cons.map(k => k.spaces.map(s => spaceName(s[0], s[1])).join(', ')).join(' · ');
     const exp = cons.map(conStatus).sort((a, b) => b.sev - a.sev)[0];
-    return `<a class="kcard" draggable="true" data-drag="${c.id}" href="#/customers/${c.id}">
+    return `<div class="kcard" draggable="true" data-drag="${c.id}" data-goto="#/customers/${c.id}" role="link" tabindex="0">
       <div class="t">${swatch(c)}<span>${c.name}</span></div>
       <div class="meta"><span>${c.ind}</span><span>${meta || '—'}</span></div>
       ${c.next ? `<div class="next">${ic('pin', 12)}${c.next[0]} · ${fmtShort(D(c.next[1]))}</div>` : ''}
       ${exp && exp.sev >= 2 ? `<div class="next" style="background:var(--warn-soft);color:var(--warn)">${ic('clock', 12)}${exp.l}</div>` : ''}
       <div class="foot"><span class="avatar sm" title="${TEAM[c.owner]}">${c.owner}</span><span class="val num">${c.stage === 'exited' ? '' : inr(val) + '<span class="muted">/mo' + (isLead ? ' est.' : '') + '</span>'}</span>${dIn !== null && isLead ? `<span class="days">${dIn}d in stage</span>` : ''}</div>
-    </a>`;
+      <select class="field mv" data-move="${c.id}" aria-label="Move ${c.name} to stage">${STAGES.map(([k, l]) => `<option value="${k}" ${k === c.stage ? 'selected' : ''}>${k === c.stage ? 'Move to…' : l}</option>`).join('')}</select>
+    </div>`;
   };
   return `
   <div class="toolbar"><span class="muted">Drag a card to move it to another stage. Tenants and leads share one pipeline.</span><span class="sp"></span>
@@ -943,7 +1004,7 @@ document.addEventListener('click', e => {
   const fdl = t.closest('[data-findlead]'); if (fdl) { const l = CUST[fdl.dataset.findlead]; state.find = { sf: String(l.need.sf), type: l.need.type, p2: !!l.need.p2, lead: l.id }; state.spacesFilter = 'all'; return; }
   const mode = t.closest('[data-mode]'); if (mode) { state.spacesMode = mode.dataset.mode; render(); return; }
   const tab = t.closest('[data-tab]'); if (tab) { state.invTab = tab.dataset.tab; render(); return; }
-  const go = t.closest('[data-goto]'); if (go && !t.closest('button,a')) { location.hash = go.dataset.goto; return; }
+  const go = t.closest('[data-goto]'); if (go && !t.closest('button,a,select')) { location.hash = go.dataset.goto; return; }
   const pal = t.closest('[data-pal]'); if (pal) { palGo(+pal.dataset.pal); return; }
   const a = t.closest('[data-act]'); if (!a) return;
   const act = a.dataset.act;
@@ -979,6 +1040,13 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); palGo(palIdx); }
   }
 });
+/* kanban: stage picker (touch screens can't drag) */
+document.addEventListener('change', e => {
+  const m = e.target.closest?.('[data-move]'); if (!m) return;
+  const c = CUST[m.dataset.move], s = m.value;
+  if (c && c.stage !== s) { c.stage = s; c.since = TODAY.toISOString().slice(0, 10); toast(`${c.name} → ${STAGE[s].l}`); rerenderKeepScroll(); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches?.('.kcard[data-goto]')) location.hash = e.target.dataset.goto; });
 /* kanban drag & drop */
 document.addEventListener('dragstart', e => { const c = e.target.closest?.('[data-drag]'); if (c) { e.dataTransfer.setData('text/plain', c.dataset.drag); e.dataTransfer.effectAllowed = 'move'; c.classList.add('dragging'); } });
 document.addEventListener('dragend', e => { e.target.closest?.('[data-drag]')?.classList.remove('dragging'); document.querySelectorAll('.kcol.over').forEach(c => c.classList.remove('over')); });
